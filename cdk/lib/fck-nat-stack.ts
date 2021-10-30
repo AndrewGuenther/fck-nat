@@ -29,8 +29,13 @@ export class FckNatStack extends cdk.Stack {
       }),
     })
 
-    new BastionHostLinux(this, 'bastion', {
+    // TODO: Should create an ASG here like on the other side
+    const bastion = new BastionHostLinux(this, 'bastion', {
       vpc
     })
+    bastion.instance.addUserData(
+      "sudo amazon-linux-extras install epel -y",
+      "sudo yum install -y iperf"
+    )
   }
 }
