@@ -11,6 +11,7 @@ source "amazon-ebs" "amazon-linux-2" {
   ami_name      = "fck-nat"
   instance_type = "t4g.micro"
   region        = "us-west-2"
+  # TODO: Should build off the AL2 minimal AMI
   source_ami    = "ami-0bd804c6ae66f0dcd"
   ssh_username  = "ec2-user"
 }

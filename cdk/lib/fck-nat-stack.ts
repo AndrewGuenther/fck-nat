@@ -1,8 +1,15 @@
 import * as cdk from '@aws-cdk/core';
-import { BastionHostLinux, GenericLinuxImage, InstanceType, LookupMachineImage, NatInstanceProvider, SubnetConfiguration, SubnetType, Vpc } from '@aws-cdk/aws-ec2';
+import { InstanceType, LookupMachineImage, NatInstanceProvider, SubnetConfiguration, SubnetType, Vpc } from '@aws-cdk/aws-ec2';
+import { IperfAsg } from './iperf-asg';
+
+interface FckNatPerfStackProps extends cdk.StackProps {
+  readonly natInstanceType: InstanceType,
+  readonly iperfInstanceType: InstanceType
+}
 
 export class FckNatStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+
+  constructor(scope: cdk.Construct, id: string, props: FckNatPerfStackProps) {
     super(scope, id, props);
 
     const public_subnet_cfg: SubnetConfiguration = {
@@ -22,20 +29,16 @@ export class FckNatStack extends cdk.Stack {
       maxAzs: 1,
       subnetConfiguration: [public_subnet_cfg, private_subnet_cfg],
       natGatewayProvider: new NatInstanceProvider({
-        instanceType: new InstanceType('t4g.micro'), // Gravitron 2 instance
+        instanceType: props.natInstanceType,
         machineImage: new LookupMachineImage({
           name: 'fck-nat'
         })
       }),
     })
 
-    // TODO: Should create an ASG here like on the other side
-    const bastion = new BastionHostLinux(this, 'bastion', {
-      vpc
+    new IperfAsg(this, 'iperf-asg', {
+      vpc,
+      instanceType: props.iperfInstanceType,
     })
-    bastion.instance.addUserData(
-      "sudo amazon-linux-extras install epel -y",
-      "sudo yum install -y iperf"
-    )
   }
 }
