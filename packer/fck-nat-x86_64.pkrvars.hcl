@@ -1,0 +1,1 @@
+architecture = "x96_64"

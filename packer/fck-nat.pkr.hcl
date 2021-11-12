@@ -8,11 +8,18 @@ packer {
 }
 
 variable "ami_regions" {
+  type = list(string)
   default = []
 }
 
-variable "sources" {
-  default = ["source.amazon-ebs.fck-nat-arm64"]
+variable "ami_users" {
+  type = list(string)
+  default = []
+}
+
+variable "ami_groups" {
+  type = list(string)
+  default = []
 }
 
 variable "virtualization_type" {
@@ -25,7 +32,7 @@ variable "architecture" {
 
 variable "instance_type" {
   default = {
-    "arm64" =  "t4g.micro"
+    "arm64"  = "t4g.micro"
     "x86_64" = "t4i.micro"
   }
 }
@@ -50,6 +57,8 @@ source "amazon-ebs" "fck-nat" {
   ami_name                = "fck-nat-${var.virtualization_type}-${local.version}${formatdate("YYYYMMDD", timestamp())}-${var.architecture}-ebs"
   ami_virtualization_type = var.virtualization_type
   ami_regions             = var.ami_regions
+  ami_users               = var.ami_users
+  ami_groups              = var.ami_groups
   instance_type           = "${lookup(var.instance_type, var.architecture, "error")}"
   region                  = var.region
   ssh_username            = var.ssh_username
