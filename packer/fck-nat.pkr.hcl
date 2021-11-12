@@ -7,20 +7,69 @@ packer {
   }
 }
 
-source "amazon-ebs" "amazon-linux-2" {
-  ami_name      = "fck-nat"
-  instance_type = "t4g.micro"
-  region        = "us-west-2"
-  # TODO: Should build off the AL2 minimal AMI
-  source_ami    = "ami-0bd804c6ae66f0dcd"
-  ssh_username  = "ec2-user"
+variable "ami_regions" {
+  default = []
+}
+
+variable "sources" {
+  default = ["source.amazon-ebs.fck-nat-arm64"]
+}
+
+variable "virtualization_type" {
+  default = "hvm"
+}
+
+variable "architecture" {
+  default = "arm64"
+}
+
+variable "instance_type" {
+  default = {
+    "arm64" =  "t4g.micro"
+    "x86_64" = "t4i.micro"
+  }
+}
+
+variable "region" {
+  default = "us-west-2"
+}
+
+variable "base_image_name" {
+  default = "*amzn2-ami-minimal-*"
+}
+
+variable "ssh_username" {
+  default = "ec2-user"
+}
+
+locals {
+  version = "1.0"
+}
+
+source "amazon-ebs" "fck-nat" {
+  ami_name                = "fck-nat-${var.virtualization_type}-${local.version}${formatdate("YYYYMMDD", timestamp())}-${var.architecture}-ebs"
+  ami_virtualization_type = var.virtualization_type
+  ami_regions             = var.ami_regions
+  instance_type           = "${lookup(var.instance_type, var.architecture, "error")}"
+  region                  = var.region
+  ssh_username            = var.ssh_username
+  source_ami_filter {
+    filters = {
+      virtualization-type = var.virtualization_type
+      architecture        = var.architecture
+      name                = var.base_image_name
+      root-device-type    = "ebs"
+    }
+    owners = [
+      "amazon"
+    ]
+    most_recent = true
+  }
 }
 
 build {
   name = "fck-nat"
-  sources = [
-    "source.amazon-ebs.amazon-linux-2"
-  ]
+  sources = ["source.amazon-ebs.fck-nat"]
 
   provisioner "file" {
     content = <<-EOT
