@@ -1,1 +1,1 @@
-architecture = "x96_64"
+architecture = "x86_64"

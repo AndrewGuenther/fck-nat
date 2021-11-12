@@ -33,7 +33,7 @@ variable "architecture" {
 variable "instance_type" {
   default = {
     "arm64"  = "t4g.micro"
-    "x86_64" = "t4i.micro"
+    "x86_64" = "t3.micro"
   }
 }
 
