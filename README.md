@@ -47,9 +47,9 @@ different base image or host the AMI yourself, you can build your own AMI.
 
 #### The public fck-nat AMIs
 
-fck-nat currently provides public AMIs in us-west-2 and us-east-1 with more regions coming soon. While arm64 images are
-the most cost effective, x86_64 images are also available. You can get view the available fck-nat AMIs with the
-following query:
+fck-nat currently provides public AMIs in most regions. You can see the full list in
+`packer/fck-nat-public-all-regions.pkrvars.hcl`. While arm64 images are the most cost effective, x86_64 images are also
+available. You can get view the available fck-nat AMIs with the following query:
 
 ```
 aws ec2 describe-images --owners 568608671756 --filters 'Name=name,Values=fck-nat-*'
