@@ -31,7 +31,8 @@ export class FckNatStack extends cdk.Stack {
       natGatewayProvider: new NatInstanceProvider({
         instanceType: props.natInstanceType,
         machineImage: new LookupMachineImage({
-          name: 'fck-nat-*-arm64-ebs'
+          name: 'fck-nat-*-arm64-ebs',
+          owners: ['568608671756'],
         })
       }),
     })

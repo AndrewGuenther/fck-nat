@@ -88,7 +88,8 @@ const vpc = new Vpc(this, 'vpc', {
     natGatewayProvider: new NatInstanceProvider({
         instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO),
         machineImage: new LookupMachineImage({
-            name: 'fck-nat-*-arm64-ebs'
+            name: 'fck-nat-*-arm64-ebs',
+            owners: ['568608671756'],
         })
     }),
 });
