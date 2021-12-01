@@ -1,5 +1,9 @@
 # fck-nat
 
+**Note: fck-nat does not yet support a high availability mode. It is not recommended at this time to run critical
+production workloads with fck-nat. See [this issue](https://github.com/AndrewGuenther/fck-nat/issues/8) for more
+information regarding release of HA mode.**
+
 Welcome to fck-nat. The (f)easible (c)ost (k)onfigurable NAT!
 
 * Overpaying for AWS Managed NAT Gateways? fck-nat.
