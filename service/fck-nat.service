@@ -1,0 +1,9 @@
+[Unit]
+Description = Configure this machine to act as a NAT instance. fck-nat.
+
+[Service]
+ExecStart = /opt/fck-nat/fck-nat.sh
+Type = oneshot
+
+[Install]
+WantedBy = multi-user.target

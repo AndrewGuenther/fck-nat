@@ -1,0 +1,12 @@
+-s dir
+--name fck-nat
+--license mit
+--version 1.0.0
+--architecture all
+--description "A NAT instance konfigurator"
+--url "https://github.com/AndrewGuenther/fck-nat"
+--maintainer "Andrew Guenther <guenther.andrew.j@gmail.com>"
+--after-install service/post-install.sh
+
+service/fck-nat.sh=/opt/fck-nat/fck-nat.sh
+service/fck-nat.service=/etc/systemd/system/fck-nat.service
