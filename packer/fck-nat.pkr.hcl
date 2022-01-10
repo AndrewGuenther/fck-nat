@@ -81,21 +81,13 @@ build {
   sources = ["source.amazon-ebs.fck-nat"]
 
   provisioner "file" {
-    content = <<-EOT
-    *nat
-    -A POSTROUTING -o eth0 -j MASQUERADE
-    COMMIT
-    EOT
-    destination = "/tmp/iptables"
+    source = "../build/fck-nat-1.0.0-any.rpm"
+    destination = "/tmp/fck-nat-1.0.0-any.rpm"
   }
 
   provisioner "shell" {
     inline = [
-      "sudo yum install iptables-services -y",
-      "sudo systemctl enable iptables",
-      "sudo systemctl start iptables",
-      "sudo mv /tmp/iptables /etc/sysconfig/iptables",
-      "echo 'net.ipv4.ip_forward = 1' | sudo tee -a /etc/sysctl.conf"
+      "sudo rpm -i /tmp/fck-nat-1.0.0-any.rpm"
     ]
   }
 }

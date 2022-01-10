@@ -1,10 +1,10 @@
 import * as cdk from '@aws-cdk/core';
-import { InstanceType, LookupMachineImage, NatInstanceProvider, SubnetConfiguration, SubnetType, Vpc } from '@aws-cdk/aws-ec2';
+import { BastionHostLinux, InstanceType, LookupMachineImage, NatInstanceProvider, SubnetConfiguration, SubnetType, Vpc } from '@aws-cdk/aws-ec2';
 import { IperfAsg } from './iperf-asg';
 
 interface FckNatPerfStackProps extends cdk.StackProps {
   readonly natInstanceType: InstanceType,
-  readonly iperfInstanceType: InstanceType
+  readonly iperfInstanceType?: InstanceType
 }
 
 export class FckNatStack extends cdk.Stack {
@@ -37,9 +37,15 @@ export class FckNatStack extends cdk.Stack {
       }),
     })
 
-    new IperfAsg(this, 'iperf-asg', {
+    const host = new BastionHostLinux(this, 'BastionHost', {
       vpc,
-      instanceType: props.iperfInstanceType,
-    })
+    });
+
+    if(props.iperfInstanceType) {
+      new IperfAsg(this, 'iperf-asg', {
+        vpc,
+        instanceType: props.iperfInstanceType,
+      })
+    }
   }
 }

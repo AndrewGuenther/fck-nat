@@ -12,8 +12,8 @@ const enable_perf = process.env.FCK_NAT_ENABLE_PERF_STACK || false
 const instanceType = InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO)
 
 new FckNatStack(app, 'FckNatStack', {
-  natInstanceType: instanceType, 
-  iperfInstanceType: instanceType,
+  natInstanceType: instanceType,
+  iperfInstanceType: enable_perf ? instanceType : undefined,
   env
 });
 
