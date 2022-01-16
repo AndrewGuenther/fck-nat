@@ -4,7 +4,8 @@ import { IperfAsg } from './iperf-asg';
 
 interface FckNatPerfStackProps extends cdk.StackProps {
   readonly natInstanceType: InstanceType,
-  readonly iperfInstanceType?: InstanceType
+  readonly iperfInstanceType?: InstanceType,
+  readonly amiOwner: string
 }
 
 export class FckNatStack extends cdk.Stack {
@@ -32,7 +33,7 @@ export class FckNatStack extends cdk.Stack {
         instanceType: props.natInstanceType,
         machineImage: new LookupMachineImage({
           name: 'fck-nat-*-arm64-ebs',
-          owners: ['568608671756'],
+          owners: [props.amiOwner],
         })
       }),
     })

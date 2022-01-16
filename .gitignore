@@ -10,3 +10,6 @@ cdk.context.json
 
 # Build folder
 /build
+
+# Env files
+.env
