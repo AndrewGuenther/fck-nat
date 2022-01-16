@@ -30,6 +30,10 @@ variable "architecture" {
   default = "arm64"
 }
 
+variable "flavor" {
+  default = "amzn2"
+}
+
 variable "instance_type" {
   default = {
     "arm64"  = "t4g.micro"
@@ -45,16 +49,40 @@ variable "base_image_name" {
   default = "*amzn2-ami-minimal-*"
 }
 
+variable "base_image_owner" {
+  default = "amazon"
+}
+
+variable "install_type" {
+  default = "rpm"
+}
+
+variable "install_file" {
+  type = map(string)
+  default = {
+    "rpm" = "fck-nat-1.0.0-any.rpm"
+    "deb" = "fck-nat-1.0.0-any.deb"
+  }
+}
+
+variable "install_command" {
+  type = map(string)
+  default = {
+    "rpm" = "sudo rpm -i"
+    "deb" = "sudo dpkg -i"
+  }
+}
+
 variable "ssh_username" {
   default = "ec2-user"
 }
 
 locals {
-  version = "1.0"
+  version = "1.1.0"
 }
 
 source "amazon-ebs" "fck-nat" {
-  ami_name                = "fck-nat-${var.virtualization_type}-${local.version}${formatdate("YYYYMMDD", timestamp())}-${var.architecture}-ebs"
+  ami_name                = "fck-nat-${var.flavor}-${var.virtualization_type}-${local.version}-${formatdate("YYYYMMDD", timestamp())}-${var.architecture}-ebs"
   ami_virtualization_type = var.virtualization_type
   ami_regions             = var.ami_regions
   ami_users               = var.ami_users
@@ -70,7 +98,7 @@ source "amazon-ebs" "fck-nat" {
       root-device-type    = "ebs"
     }
     owners = [
-      "amazon"
+      var.base_image_owner
     ]
     most_recent = true
   }
@@ -81,13 +109,13 @@ build {
   sources = ["source.amazon-ebs.fck-nat"]
 
   provisioner "file" {
-    source = "../build/fck-nat-1.0.0-any.rpm"
-    destination = "/tmp/fck-nat-1.0.0-any.rpm"
+    source = "build/${lookup(var.install_file, var.install_type, "fail")}"
+    destination = "/tmp/${lookup(var.install_file, var.install_type, "fail")}"
   }
 
   provisioner "shell" {
     inline = [
-      "sudo rpm -i /tmp/fck-nat-1.0.0-any.rpm"
+      "${lookup(var.install_command, var.install_type, "fail")} /tmp/${lookup(var.install_file, var.install_type, "fail")}"
     ]
   }
 }
