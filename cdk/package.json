@@ -5,23 +5,23 @@
     "fck-nat": "bin/fck-nat.js"
   },
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
+    "lint": "ts-standard --fix",
     "cdk": "cdk"
   },
   "devDependencies": {
-    "@aws-cdk/assert": "1.129.0",
     "@types/node": "10.17.27",
     "aws-cdk": "1.129.0",
-    "ts-node": "^9.0.0",
-    "typescript": "~3.9.7"
-  },
-  "dependencies": {
+    "@aws-cdk/assert": "1.129.0",
     "@aws-cdk/aws-autoscaling": "^1.130.0",
     "@aws-cdk/aws-ec2": "^1.129.0",
     "@aws-cdk/aws-iam": "^1.130.0",
     "@aws-cdk/core": "1.129.0",
     "dotenv": "^12.0.4",
-    "source-map-support": "^0.5.16"
+    "ts-node": "^9.0.0",
+    "typescript": "~3.9.7",
+    "ts-standard": "*"
+  },
+  "dependencies": {
+
   }
 }

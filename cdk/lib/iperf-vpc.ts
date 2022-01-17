@@ -1,17 +1,19 @@
-import * as cdk from '@aws-cdk/core';
-import { InstanceType, IPeer, SubnetConfiguration, SubnetType, Vpc } from '@aws-cdk/aws-ec2';
-import { IperfAsg } from './iperf-asg';
+/* eslint-disable no-new */
+
+import * as cdk from '@aws-cdk/core'
+import { InstanceType, IPeer, SubnetConfiguration, SubnetType, Vpc } from '@aws-cdk/aws-ec2'
+import { IperfAsg } from './iperf-asg'
 
 interface IperfVpcProps extends cdk.StackProps {
-  readonly iperfInstanceType: InstanceType,
+  readonly iperfInstanceType: InstanceType
   readonly iperfIncomingPeer?: IPeer
 }
 
 export class IperfVpc extends cdk.Construct {
-  constructor(scope: cdk.Construct, id: string, props: IperfVpcProps) {
-    super(scope, id);
+  constructor (scope: cdk.Construct, id: string, props: IperfVpcProps) {
+    super(scope, id)
 
-    const public_subnet_cfg: SubnetConfiguration = {
+    const publicSubnetCfg: SubnetConfiguration = {
       name: 'public-subnet',
       subnetType: SubnetType.PUBLIC,
       cidrMask: 24,
@@ -20,7 +22,7 @@ export class IperfVpc extends cdk.Construct {
 
     const vpc = new Vpc(this, 'vpc', {
       maxAzs: 1,
-      subnetConfiguration: [public_subnet_cfg],
+      subnetConfiguration: [publicSubnetCfg]
     })
 
     new IperfAsg(this, 'iperf-asg', {
