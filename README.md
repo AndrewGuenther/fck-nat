@@ -56,7 +56,11 @@ fck-nat currently provides public AMIs in most regions. You can see the full lis
 available. You can get view the available fck-nat AMIs with the following query:
 
 ```
-aws ec2 describe-images --owners 568608671756 --filters 'Name=name,Values=fck-nat-*'
+# Amazon Linux 2 based AMIs
+aws ec2 describe-images --owners 568608671756 --filters 'Name=name,Values=fck-nat-amzn2-*'
+
+# Ubuntu based AMIs
+aws ec2 describe-images --owners 568608671756 --filters 'Name=name,Values=fck-nat-ubuntu-*'
 ```
 
 #### Building your own fck-nat AMI
@@ -69,6 +73,11 @@ you would prefer to host the AMIs yourself, you can create your own `pkrvars.hcl
 ```shell
 packer build -var-file="your-var-file.pkrvars.hcl" ./packer/fck-nat.pkr.hcl
 ```
+
+#### Installing fck-nat on an existing AMI
+
+If you have an existing AMI and you want to install fck-nat on it, you can get the `.deb` or `.rpm` build of fck-nat
+from the [Releases](https://github.com/AndrewGuenther/fck-nat/releases) page
 
 ### Using your fck-nat AMI
 
@@ -92,7 +101,7 @@ const vpc = new Vpc(this, 'vpc', {
     natGatewayProvider: new NatInstanceProvider({
         instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO),
         machineImage: new LookupMachineImage({
-            name: 'fck-nat-*-arm64-ebs',
+            name: 'fck-nat-amzn2-*-arm64-ebs',
             owners: ['568608671756'],
         })
     }),
