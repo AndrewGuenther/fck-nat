@@ -1,32 +1,28 @@
 import * as cdk from '@aws-cdk/core';
-import { InstanceType, IPeer, SubnetConfiguration, SubnetType, Vpc } from '@aws-cdk/aws-ec2';
+import { InstanceType, NatInstanceProvider } from '@aws-cdk/aws-ec2';
 import { IperfAsg } from './iperf-asg';
+import { FckNatVpc } from './fck-nat-vpc'
+import { IperfVpc } from './iperf-vpc';
 
 interface FckNatPerfStackProps extends cdk.StackProps {
+  readonly natInstanceProvider: NatInstanceProvider,
   readonly iperfInstanceType: InstanceType,
-  readonly iperfIncomingPeer?: IPeer
 }
 
 export class FckNatPerfStack extends cdk.Stack {
+
   constructor(scope: cdk.Construct, id: string, props: FckNatPerfStackProps) {
     super(scope, id, props);
 
-    const public_subnet_cfg: SubnetConfiguration = {
-      name: 'public-subnet',
-      subnetType: SubnetType.PUBLIC,
-      cidrMask: 24,
-      reserved: false
-    }
+    const fckNatVpc = new FckNatVpc(this, 'fck-nat-vpc', props);
 
-    const vpc = new Vpc(this, 'vpc', {
-      maxAzs: 1,
-      subnetConfiguration: [public_subnet_cfg],
-    })
+    new IperfVpc(this, 'iperf-vpc', {
+      iperfInstanceType: props.iperfInstanceType
+    });
 
     new IperfAsg(this, 'iperf-asg', {
-      vpc,
+      vpc: fckNatVpc.vpc,
       instanceType: props.iperfInstanceType,
-      incomingPeer: props.iperfIncomingPeer
-    })
+    });
   }
 }
