@@ -31,3 +31,6 @@ all-amis: al2-ami ubnt-ami
 
 publish: regions_file = "-var-file=\"packer/fck-nat-public-all-regions.pkrvars.hcl\""
 publish: all-amis
+
+test:
+	aws ssm send-command --document-name "AWS-RunShellScript" --targets "Key=tag:connectivity-test-target,Values=true" --parameters '{"commands":["curl https://www.google.com"]}'

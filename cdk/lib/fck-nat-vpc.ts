@@ -2,6 +2,7 @@
 
 import * as cdk from '@aws-cdk/core'
 import { BastionHostLinux, NatInstanceProvider, SubnetConfiguration, SubnetType, Vpc } from '@aws-cdk/aws-ec2'
+import { Tags } from '@aws-cdk/core'
 
 interface FckNatVpcProps extends cdk.StackProps {
   readonly natInstanceProvider: NatInstanceProvider
@@ -32,8 +33,10 @@ export class FckNatVpc extends cdk.Construct {
       natGatewayProvider: props.natInstanceProvider
     })
 
-    new BastionHostLinux(this, 'BastionHost', {
+    const bastion = new BastionHostLinux(this, 'BastionHost', {
       vpc: this.vpc
     })
+
+    Tags.of(bastion).add('connectivity-test-target', 'true')
   }
 }
