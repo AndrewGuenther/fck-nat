@@ -33,4 +33,6 @@ publish: regions_file = "-var-file=\"packer/fck-nat-public-all-regions.pkrvars.h
 publish: all-amis
 
 test:
+	rm -f cdk/cdk.context.json
+	cd cdk && cdk deploy FckNatTestStack
 	aws ssm send-command --document-name "AWS-RunShellScript" --targets "Key=tag:connectivity-test-target,Values=true" --parameters '{"commands":["curl https://www.google.com"]}'
