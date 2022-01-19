@@ -23,7 +23,7 @@ ubnt-ami-arm64: package-deb
 	packer build -var-file="packer/fck-nat-arm64.pkrvars.hcl" -var-file="packer/fck-nat-ubnt.pkrvars.hcl" $(regions_file) packer/fck-nat.pkr.hcl
 
 ubnt-ami-x86: package-deb
-	packer build -var-file="packer/fck-nat-x86.pkrvars.hcl" -var-file="packer/fck-nat-ubnt.pkrvars.hcl" $(regions_file) packer/fck-nat.pkr.hcl
+	packer build -var-file="packer/fck-nat-x86_64.pkrvars.hcl" -var-file="packer/fck-nat-ubnt.pkrvars.hcl" $(regions_file) packer/fck-nat.pkr.hcl
 
 ubnt-ami: ubnt-ami-arm64 ubnt-ami-x86
 
