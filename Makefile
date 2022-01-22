@@ -4,12 +4,12 @@ ensure-build:
 	mkdir -p build
 
 package-rpm: ensure-build
-	rm -f build/fck-nat-1.0.0-any.rpm
-	fpm -t rpm -p build/fck-nat-1.0.0-any.rpm
+	rm -f build/fck-nat-1.1.0-any.rpm
+	fpm -t rpm -p build/fck-nat-1.1.0-any.rpm
 
 package-deb: ensure-build
-	rm -f build/fck-nat-1.0.0-any.deb
-	fpm -t deb -p build/fck-nat-1.0.0-any.deb
+	rm -f build/fck-nat-1.1.0-any.deb
+	fpm -t deb -p build/fck-nat-1.1.0-any.deb
 
 al2-ami-arm64: package-rpm
 	packer build -var-file="packer/fck-nat-arm64.pkrvars.hcl" -var-file="packer/fck-nat-al2.pkrvars.hcl" $(regions_file) packer/fck-nat.pkr.hcl
