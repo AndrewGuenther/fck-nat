@@ -29,7 +29,7 @@ ubnt-ami: ubnt-ami-arm64 ubnt-ami-x86
 
 all-amis: al2-ami ubnt-ami
 
-publish: regions_file = "-var-file=\"packer/fck-nat-public-all-regions.pkrvars.hcl\""
+publish: regions_file = -var-file="packer/fck-nat-public-all-regions.pkrvars.hcl"
 publish: all-amis
 
 test:
