@@ -1,11 +1,11 @@
 /* eslint-disable no-new */
 
 import * as cdk from '@aws-cdk/core'
-import { BastionHostLinux, NatInstanceProvider, SubnetConfiguration, SubnetType, Vpc } from '@aws-cdk/aws-ec2'
+import { BastionHostLinux, NatInstanceProvider, NatProvider, SubnetConfiguration, SubnetType, Vpc } from '@aws-cdk/aws-ec2'
 import { Tags } from '@aws-cdk/core'
 
 interface FckNatVpcProps extends cdk.StackProps {
-  readonly natInstanceProvider: NatInstanceProvider
+  readonly natInstanceProvider: NatProvider
 }
 
 export class FckNatVpc extends cdk.Construct {
