@@ -1,5 +1,5 @@
 import * as cdk from '@aws-cdk/core'
-import { InstanceType, CfnNetworkInterface, ConfigureNatOptions, Connections, GatewayConfig, IMachineImage, ISecurityGroup, LookupMachineImage, NatInstanceProvider, NatProvider, PrivateSubnet, RouterType, SecurityGroup } from '@aws-cdk/aws-ec2'
+import { InstanceType, CfnNetworkInterface, ConfigureNatOptions, Connections, GatewayConfig, IMachineImage, ISecurityGroup, LookupMachineImage, NatInstanceProvider, NatProvider, PrivateSubnet, RouterType, SecurityGroup, UserData } from '@aws-cdk/aws-ec2'
 import * as iam from '@aws-cdk/aws-iam'
 import { AutoScalingGroup } from '@aws-cdk/aws-autoscaling';
 /**
@@ -99,13 +99,30 @@ export class FckNatInstanceProvider extends NatProvider {
       });
       this._connections = new Connections({ securityGroups: [this._securityGroup] });
 
-      // FIXME: Ideally, NAT instances don't have a role at all, but
-      // 'Instance' does not allow that right now.
+      // TODO: This should get buttoned up to only allow attaching ENIs created by this construct.
       const role = new iam.Role(options.vpc, 'NatRole', {
         assumedBy: new iam.ServicePrincipal('ec2.amazonaws.com'),
+        inlinePolicies: {
+          "attachNatEniPolicy": new iam.PolicyDocument({
+            statements: [new iam.PolicyStatement({
+              actions: ['ec2:AttachNetworkInterface'],
+              resources: ['*']
+            })]
+        })}
       });
 
       for (const sub of options.natSubnets) {
+        const networkInterface = new CfnNetworkInterface(
+          sub, 'FckNatInterface', {
+            subnetId: sub.subnetId,
+            sourceDestCheck: false,
+            groupSet: [this._securityGroup.securityGroupId]
+          }
+        )
+
+        const userData = UserData.forLinux()
+        userData.addCommands(`echo "eni_id=${networkInterface.ref}" >> /etc/fck-nat.conf`)
+
         const autoScalingGroup = new AutoScalingGroup(
           sub, 'FckNatAsg', {
             instanceType: this.props.instanceType,
@@ -115,13 +132,7 @@ export class FckNatInstanceProvider extends NatProvider {
             securityGroup: this._securityGroup,
             role,
             desiredCapacity: 1,
-          }
-        )
-        const networkInterface = new CfnNetworkInterface(
-          sub, 'FckNatInterface', {
-            subnetId: sub.subnetId,
-            sourceDestCheck: false,
-            groupSet: [this._securityGroup.securityGroupId]
+            userData: userData,
           }
         )
         // NAT instance routes all traffic, both ways
