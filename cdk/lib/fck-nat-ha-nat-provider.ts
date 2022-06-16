@@ -1,5 +1,5 @@
 import * as cdk from '@aws-cdk/core'
-import { InstanceType, CfnNetworkInterface, ConfigureNatOptions, Connections, GatewayConfig, IMachineImage, ISecurityGroup, LookupMachineImage, NatInstanceProvider, NatProvider, PrivateSubnet, RouterType, SecurityGroup, UserData } from '@aws-cdk/aws-ec2'
+import { InstanceType, CfnNetworkInterface, ConfigureNatOptions, Connections, GatewayConfig, IMachineImage, ISecurityGroup, LookupMachineImage, NatInstanceProvider, NatProvider, PrivateSubnet, RouterType, SecurityGroup, UserData, CfnEIP, CfnEIPAssociation } from '@aws-cdk/aws-ec2'
 import * as iam from '@aws-cdk/aws-iam'
 import { AutoScalingGroup } from '@aws-cdk/aws-autoscaling';
 /**
@@ -120,6 +120,15 @@ export class FckNatInstanceProvider extends NatProvider {
           }
         )
 
+        const eip = new CfnEIP(sub, 'Eip', {
+          domain: 'vpc',
+        })
+
+        const eipAssociation = new CfnEIPAssociation(sub, 'EipAssociation', {
+          eip: eip.ref,
+          networkInterfaceId: networkInterface.ref
+        })
+
         const userData = UserData.forLinux()
         userData.addCommands(`echo "eni_id=${networkInterface.ref}" >> /etc/fck-nat.conf`)
 
@@ -133,6 +142,7 @@ export class FckNatInstanceProvider extends NatProvider {
             role,
             desiredCapacity: 1,
             userData: userData,
+            keyName: "andrew-personal"
           }
         )
         // NAT instance routes all traffic, both ways
