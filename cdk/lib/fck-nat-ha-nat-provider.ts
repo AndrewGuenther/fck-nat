@@ -1,5 +1,5 @@
 import * as cdk from '@aws-cdk/core'
-import { InstanceType, CfnNetworkInterface, ConfigureNatOptions, Connections, GatewayConfig, IMachineImage, ISecurityGroup, LookupMachineImage, NatInstanceProvider, NatProvider, PrivateSubnet, RouterType, SecurityGroup, UserData, CfnEIP, CfnEIPAssociation } from '@aws-cdk/aws-ec2'
+import { InstanceType, CfnNetworkInterface, ConfigureNatOptions, Connections, GatewayConfig, IMachineImage, ISecurityGroup, LookupMachineImage, NatInstanceProvider, NatProvider, PrivateSubnet, RouterType, SecurityGroup, UserData, CfnEIP, CfnEIPAssociation, IConnectable } from '@aws-cdk/aws-ec2'
 import * as iam from '@aws-cdk/aws-iam'
 import { AutoScalingGroup } from '@aws-cdk/aws-autoscaling';
 /**
@@ -78,7 +78,7 @@ import { AutoScalingGroup } from '@aws-cdk/aws-autoscaling';
   readonly securityGroup?: ISecurityGroup;
 }
 
-export class FckNatInstanceProvider extends NatProvider {
+export class FckNatInstanceProvider extends NatProvider implements IConnectable {
     private gateways: PrefSet<CfnNetworkInterface> = new PrefSet<CfnNetworkInterface>();
     private _securityGroup?: ISecurityGroup;
     private _connections?: Connections;
@@ -125,12 +125,14 @@ export class FckNatInstanceProvider extends NatProvider {
         })
 
         const eipAssociation = new CfnEIPAssociation(sub, 'EipAssociation', {
-          eip: eip.ref,
+          allocationId: eip.attrAllocationId,
           networkInterfaceId: networkInterface.ref
         })
 
         const userData = UserData.forLinux()
+        userData.addCommands('yum install -y aws-cli ec2-net-utils')
         userData.addCommands(`echo "eni_id=${networkInterface.ref}" >> /etc/fck-nat.conf`)
+        userData.addCommands('service fck-nat restart')
 
         const autoScalingGroup = new AutoScalingGroup(
           sub, 'FckNatAsg', {
@@ -142,7 +144,6 @@ export class FckNatInstanceProvider extends NatProvider {
             role,
             desiredCapacity: 1,
             userData: userData,
-            keyName: "andrew-personal"
           }
         )
         // NAT instance routes all traffic, both ways
