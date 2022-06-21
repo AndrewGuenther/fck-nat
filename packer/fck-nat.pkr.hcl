@@ -60,8 +60,8 @@ variable "install_type" {
 variable "install_file" {
   type = map(string)
   default = {
-    "rpm" = "fck-nat-1.0.0-any.rpm"
-    "deb" = "fck-nat-1.0.0-any.deb"
+    "rpm" = "fck-nat-1.1.0-any.rpm"
+    "deb" = "fck-nat-1.1.0-any.deb"
   }
 }
 
