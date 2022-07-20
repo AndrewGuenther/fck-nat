@@ -32,9 +32,11 @@ now EOL, and has no ARM support, meaning it can't be deployed on EC2's most cost
 
 AWS limits outgoing internet bandwidth on EC2 instances to 5Gbps. This means that the highest bandwidth that fck-nat
 can support is 5Gbps. This is enough to cover a very broad set of use cases, but if you need additional bandwidth,
-you'll have to use Managed NAT Gateway. If AWS were to lift the limit on internet egress bandwidth from EC2, you could
+you should use Managed NAT Gateway. If AWS were to lift the limit on internet egress bandwidth from EC2, you could
 cost-effectively operate fck-nat at speeds up to 25Gbps, but you wouldn't need Managed NAT Gateway then would you?
 fck-nat.
+
+Read more about EC2 bandwidth limits here: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-network-bandwidth.html
 
 ## Using fck-nat
 
