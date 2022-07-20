@@ -1,4 +1,4 @@
-package: package-rpm package-deb
+package: package-rpm
 
 ensure-build:
 	mkdir -p build
