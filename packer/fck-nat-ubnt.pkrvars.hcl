@@ -1,5 +1,0 @@
-flavor = "ubuntu"
-base_image_name = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-*"
-base_image_owner = "099720109477"
-install_type = "deb"
-ssh_username = "ubuntu"
