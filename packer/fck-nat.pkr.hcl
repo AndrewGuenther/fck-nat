@@ -67,7 +67,7 @@ variable "install_file" {
 variable "install_command" {
   type = map(string)
   default = {
-    "rpm" = "sudo rpm -i"
+    "rpm" = "sudo yum --nogpgcheck -y localinstall"
   }
 }
 

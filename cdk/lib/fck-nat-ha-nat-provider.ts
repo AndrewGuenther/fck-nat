@@ -130,7 +130,6 @@ export class FckNatInstanceProvider extends NatProvider implements IConnectable 
         })
 
         const userData = UserData.forLinux()
-        userData.addCommands('yum install -y aws-cli ec2-net-utils')
         userData.addCommands(`echo "eni_id=${networkInterface.ref}" >> /etc/fck-nat.conf`)
         userData.addCommands('service fck-nat restart')
 
