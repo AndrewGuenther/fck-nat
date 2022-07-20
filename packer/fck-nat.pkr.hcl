@@ -7,6 +7,11 @@ packer {
   }
 }
 
+
+variable "version" {
+  type = string
+}
+
 variable "ami_regions" {
   type = list(string)
   default = []
@@ -53,34 +58,12 @@ variable "base_image_owner" {
   default = "amazon"
 }
 
-variable "install_type" {
-  default = "rpm"
-}
-
-variable "install_file" {
-  type = map(string)
-  default = {
-    "rpm" = "fck-nat-1.1.0-any.rpm"
-  }
-}
-
-variable "install_command" {
-  type = map(string)
-  default = {
-    "rpm" = "sudo yum --nogpgcheck -y localinstall"
-  }
-}
-
 variable "ssh_username" {
   default = "ec2-user"
 }
 
-locals {
-  version = "1.1.0"
-}
-
 source "amazon-ebs" "fck-nat" {
-  ami_name                = "fck-nat-${var.flavor}-${var.virtualization_type}-${local.version}-${formatdate("YYYYMMDD", timestamp())}-${var.architecture}-ebs"
+  ami_name                = "fck-nat-${var.flavor}-${var.virtualization_type}-${var.version}-${formatdate("YYYYMMDD", timestamp())}-${var.architecture}-ebs"
   ami_virtualization_type = var.virtualization_type
   ami_regions             = var.ami_regions
   ami_users               = var.ami_users
@@ -107,13 +90,13 @@ build {
   sources = ["source.amazon-ebs.fck-nat"]
 
   provisioner "file" {
-    source = "build/${lookup(var.install_file, var.install_type, "fail")}"
-    destination = "/tmp/${lookup(var.install_file, var.install_type, "fail")}"
+    source = "build/fck-nat-${var.version}-any.rpm"
+    destination = "/tmp/fck-nat-${var.version}-any.rpm"
   }
 
   provisioner "shell" {
     inline = [
-      "${lookup(var.install_command, var.install_type, "fail")} /tmp/${lookup(var.install_file, var.install_type, "fail")}"
+      "sudo yum --nogpgcheck -y localinstall /tmp/fck-nat-${var.version}-any.rpm"
     ]
   }
 }

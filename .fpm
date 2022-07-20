@@ -1,7 +1,6 @@
 -s dir
 --name fck-nat
 --license mit
---version 1.1.0
 --architecture all
 --description "A NAT instance konfigurator"
 --url "https://github.com/AndrewGuenther/fck-nat"
