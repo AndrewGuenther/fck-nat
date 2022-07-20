@@ -1,11 +1,12 @@
 /* eslint-disable no-new */
 
 import * as cdk from '@aws-cdk/core'
-import { BastionHostLinux, NatInstanceProvider, SubnetConfiguration, SubnetType, Vpc } from '@aws-cdk/aws-ec2'
+import { BastionHostLinux, Peer, Port, SubnetConfiguration, SubnetType, Vpc } from '@aws-cdk/aws-ec2'
 import { Tags } from '@aws-cdk/core'
+import { FckNatInstanceProvider } from './fck-nat-ha-nat-provider'
 
 interface FckNatVpcProps extends cdk.StackProps {
-  readonly natInstanceProvider: NatInstanceProvider
+  readonly natInstanceProvider: FckNatInstanceProvider
 }
 
 export class FckNatVpc extends cdk.Construct {
@@ -32,6 +33,8 @@ export class FckNatVpc extends cdk.Construct {
       subnetConfiguration: [publicSubnetCfg, privateSubnetCfg],
       natGatewayProvider: props.natInstanceProvider
     })
+
+    props.natInstanceProvider.connections.allowFrom(Peer.ipv4(this.vpc.vpcCidrBlock), Port.allTraffic())
 
     const bastion = new BastionHostLinux(this, 'BastionHost', {
       vpc: this.vpc

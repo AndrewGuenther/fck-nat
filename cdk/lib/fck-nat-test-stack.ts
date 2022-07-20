@@ -1,11 +1,11 @@
 /* eslint-disable no-new */
 
 import * as cdk from '@aws-cdk/core'
-import { NatInstanceProvider } from '@aws-cdk/aws-ec2'
 import { FckNatVpc } from './fck-nat-vpc'
+import { FckNatInstanceProvider } from './fck-nat-ha-nat-provider'
 
 interface FckNatTestStackProps extends cdk.StackProps {
-  readonly natInstanceProviders: NatInstanceProvider[]
+  readonly natInstanceProviders: FckNatInstanceProvider[]
 }
 
 export class FckNatTestStack extends cdk.Stack {

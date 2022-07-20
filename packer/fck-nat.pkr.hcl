@@ -61,15 +61,13 @@ variable "install_file" {
   type = map(string)
   default = {
     "rpm" = "fck-nat-1.1.0-any.rpm"
-    "deb" = "fck-nat-1.1.0-any.deb"
   }
 }
 
 variable "install_command" {
   type = map(string)
   default = {
-    "rpm" = "sudo rpm -i"
-    "deb" = "sudo dpkg -i"
+    "rpm" = "sudo yum --nogpgcheck -y localinstall"
   }
 }
 

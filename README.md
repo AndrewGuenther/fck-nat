@@ -58,9 +58,6 @@ available. You can get view the available fck-nat AMIs with the following query:
 ```
 # Amazon Linux 2 based AMIs
 aws ec2 describe-images --owners 568608671756 --filters 'Name=name,Values=fck-nat-amzn2-*'
-
-# Ubuntu based AMIs
-aws ec2 describe-images --owners 568608671756 --filters 'Name=name,Values=fck-nat-ubuntu-*'
 ```
 
 #### Building your own fck-nat AMI
@@ -76,7 +73,7 @@ packer build -var-file="your-var-file.pkrvars.hcl" ./packer/fck-nat.pkr.hcl
 
 #### Installing fck-nat on an existing AMI
 
-If you have an existing AMI and you want to install fck-nat on it, you can get the `.deb` or `.rpm` build of fck-nat
+If you have an existing AMI and you want to install fck-nat on it, you can get the `.rpm` build of fck-nat
 from the [Releases](https://github.com/AndrewGuenther/fck-nat/releases) page
 
 ### Using your fck-nat AMI
