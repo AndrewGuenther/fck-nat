@@ -41,6 +41,11 @@ fi
 echo "Enabling ip_forward..."
 sysctl -q -w net.ipv4.ip_forward=1
 
+echo "Disabling reverse path protection..."
+for i in $(find /proc/sys/net/ipv4/conf/ -name rp_filter) ; do
+  echo 0 > $i;
+done
+
 echo "Flushing NAT table..."
 iptables -t nat -F
 
