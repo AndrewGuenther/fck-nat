@@ -13,6 +13,13 @@ if test -n "$eni_id"; then
     aws_region="$(/opt/aws/bin/ec2-metadata -z | cut -f2 -d' ' | sed 's/.$//')"
     instance_id="$(/opt/aws/bin/ec2-metadata -i | cut -f2 -d' ')"
 
+    eth0_mac="$(cat /sys/class/net/eth0/address)"
+    eth0_eni_id="$(curl http://169.254.169.254/latest/meta-data/network/interfaces/macs/$eth0_mac/interface-id)"
+    aws ec2 modify-network-interface-attribute \
+        --region "$aws_region" \
+        --network-interface-id "$eth0_eni_id" \
+        --no-source-dest-check
+
     aws ec2 attach-network-interface \
         --region "$aws_region" \
         --instance-id "$instance_id" \
@@ -24,12 +31,7 @@ if test -n "$eni_id"; then
         sleep 1
     done
 
-    ec2ifup eth1
-    ec2ifdown eth0
-
-    rm -f /etc/sysconfig/network-scripts/ifcfg-eth0
-
-    nat_interface="eth1"
+    nat_interface="eth0"
 elif test -n "$interface"; then
     echo "Found interface configuration, using $interface"
     nat_interface=$interface
