@@ -30,12 +30,7 @@ if test -n "$eni_id"; then
         sleep 1
     done
 
-    ec2ifup eth1
-    ec2ifdown eth0
-
-    rm -f /etc/sysconfig/network-scripts/ifcfg-eth0
-
-    nat_interface="eth1"
+    nat_interface="eth0"
 elif test -n "$interface"; then
     echo "Found interface configuration, using $interface"
     nat_interface=$interface
