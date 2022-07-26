@@ -19,6 +19,12 @@ if test -n "$eni_id"; then
         --device-index 1 \
         --network-interface-id "$eni_id"
 
+    echo "Disabling source/destination checks on $eni_id..."
+    aws ec2 modify-network-interface-attribute \
+        --region "$aws_region" \
+        --network-interface-id "$eni_id" \
+        --no-source-dest-check
+
     while ! ip link show dev eth1; do
         echo "Waiting for ENI to come up..."
         sleep 1
