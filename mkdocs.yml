@@ -1,0 +1,18 @@
+site_name: fck-nat
+
+theme:
+  name: material
+
+nav:
+  - Introduction: index.md
+  - Deploying: deploying.md
+  - Features: features.md
+
+repo_url: https://github.com/AndrewGuenther/fck-nat
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
