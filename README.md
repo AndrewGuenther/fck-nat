@@ -6,6 +6,8 @@ Welcome to fck-nat. The (f)easible (c)ost (k)onfigurable NAT!
 * Want to use NAT instances and stay up-to-date with the latest security patches? fck-nat.
 * Want to reuse your Bastion hosts as a NAT? fck-nat.
 
+Full documentation is available at https://fck-nat.dev
+
 fck-nat offers a ready-to-use ARM and x86 based AMIs built on Amazon Linux 2 which can support up to 5Gbps burst NAT
 traffic on a t4g.nano instance. How does that compare to a Managed NAT Gateway?
 
