@@ -2,6 +2,18 @@ site_name: fck-nat
 
 theme:
   name: material
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
 
 nav:
   - Introduction: index.md
@@ -9,6 +21,8 @@ nav:
   - Features: features.md
 
 repo_url: https://github.com/AndrewGuenther/fck-nat
+repo_name: AndrewGuenther/fck-nat
+edit_uri: edit/main/docs/
 
 markdown_extensions:
   - pymdownx.highlight:
