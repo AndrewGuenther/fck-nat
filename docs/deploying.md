@@ -101,7 +101,13 @@ PrivateSubnetRoute:
 ```
 
 ## Manual - Web Console
-The following instructions can be used to deploy the fck-nat AMI manually and manipulate the routing table.  
+The following instructions can be used to deploy the fck-nat AMI manually.  
+Summary:  
+1. Launch fck-nat AMI
+2. Modify ENI to disable source/dest check
+3. Modify the private route table, default route to fck-nat target
+4. Validate
+
 NOTE: The following example uses AMI version 1.2.0 for arm64 on t4g.nano.
 
 ### EC2 Instance Launch
