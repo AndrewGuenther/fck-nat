@@ -137,6 +137,9 @@ We must modify the ENI attached to the newly launched instance to disable source
    ![Modify ENI](images/1_open_eni.png "Modify ENI")  
 2. Select ENI, Click Actions -> Change source/dest. check
    ![change source dest check](images/2_change_source_dest_check.png "Change Source/Dest Check")  
-3. Disable Source/Dest check and Save
+3. Disable Source/Dest check and Save  
    ![change source dest check](images/3_disable_and_save.png "Disable Source/Dest Check")  
  
+### Modify VPC Routing Table
+The VPC routing table associated with your private subnets must be modified to route traffic matching the default route to the new fck-nat instance.  
+1.  
