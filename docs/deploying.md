@@ -142,4 +142,16 @@ We must modify the ENI attached to the newly launched instance to disable source
  
 ### Modify VPC Routing Table
 The VPC routing table associated with your private subnets must be modified to route traffic matching the default route to the new fck-nat instance.  
-1.  
+1.  Open the VPC Service, Route Tables  
+   ![Route Tables](images/1_route_tables.png "VPC Route Tables")  
+2. Open the private route table, edit routes  
+   ![Edit private route table](images/2_edit_route_table.png "Edit Private Route Table")  
+3. Add a default route, target: fck-nat instance  
+   ![Add default route](images/3_add_new_default_route_to_instance.png "Add default route to fck-nat target")  
+
+### Validate
+Log into an instance in a private subnet and validate the external IP is the public IP assigned to your fck-nat instance.  
+
+![Validate](images/1_validate.png "Validate")  
+
+
