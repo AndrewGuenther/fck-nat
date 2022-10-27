@@ -114,14 +114,14 @@ NOTE: The following example uses fck-nat AMI version 1.2.0 for arm64 on t4g.nano
 1. Visit the EC2 service in your preferred region: [EC2 Link](https://us-east-2.console.aws.amazon.com/ec2/)
 2. Click Launch Instances  
    ![Launch Instance](images/2_launch_instance.png "Launch Instance")
-3. Give the instance a name
+3. Give the instance a name  
    ![Name Instance](images/3_name_instance.png "Name Instance")
 4. Search for AMIs owned by "568608671756"
    ![Search AMI](images/4_search_owner.png "Search AMI Owner")
-5. Select the ARM64 1.2.0 fck-nat AMI
+5. Select the ARM64 1.2.0 fck-nat AMI  
    ![Select AMI](images/5_select_ami.png "Select AMI")  
    ![AMI Selected](images/5.2_ami_selected.png "AMI Selected")  
-6. Select Instance Type t4g.nano
+6. Select Instance Type t4g.nano  
    ![Select t4g.nano](images/6_select_instance_type.png "Select Instance Type")  
 7. Modify Network Settings  
    - Select VPC  
@@ -139,9 +139,9 @@ Wait for Launch
 
 ### Modify EC2 Network Interface
 We must modify the ENI attached to the newly launched instance to disable source/destination checks, this allows us to route _through_ (actually hairpinning) the instance.
-1. Click on the ENI of the instance
+1. Click on the ENI of the instance  
    ![Modify ENI](images/1_open_eni.png "Modify ENI")  
-2. Select ENI, Click Actions -> Change source/dest. check
+2. Select ENI, Click Actions -> Change source/dest. check  
    ![change source dest check](images/2_change_source_dest_check.png "Change Source/Dest Check")  
 3. Disable Source/Dest check and Save  
    ![change source dest check](images/3_disable_and_save.png "Disable Source/Dest Check")  
