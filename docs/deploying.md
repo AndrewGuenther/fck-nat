@@ -108,7 +108,7 @@ Summary:
 3. Modify the private route table, default route to fck-nat target
 4. Validate
 
-NOTE: The following example uses AMI version 1.2.0 for arm64 on t4g.nano.
+NOTE: The following example uses fck-nat AMI version 1.2.0 for arm64 on t4g.nano.
 
 ### EC2 Instance Launch
 1. Visit the EC2 service in your preferred region: [EC2 Link](https://us-east-2.console.aws.amazon.com/ec2/)
