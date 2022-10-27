@@ -102,8 +102,30 @@ PrivateSubnetRoute:
 
 ## Manual - Web Console
 The following instructions can be used to deploy the fck-nat AMI manually and manipulate the routing table.  
+NOTE: The following example uses AMI version 1.2.0 for arm64 on t4g.nano.
 
 1. Visit the EC2 service in your preferred region: [EC2 Link](https://us-east-2.console.aws.amazon.com/ec2/)
 2. Click Launch Instances  
-   ![Launch Instance](images/1_launch_instance.png "Launch Instance")
+   ![Launch Instance](images/2_launch_instance.png "Launch Instance")
+3. Give the instance a name
+   ![Name Instance](images/3_name_instance.png "Name Instance")
+4. Search for AMIs owned by "568608671756"
+   ![Search AMI](images/4_search_owner.png "Search AMI Owner")
+5. Select the ARM64 1.2.0 fck-nat AMI
+   ![Select AMI](images/5_select_ami.png "Select AMI")  
+   ![AMI Selected](images/5-2_ami_selected.png "AMI Selected")  
+6. Select Instance Type t4g.nano
+   ![Select t4g.nano](images/6_select_instance_type.png "Select Instance Type")  
+7. Modify Network Settings
+   - Select VPC
+   - Place in public subnet  
+   - Attached Security group that permits 
+       inbound: entire VPC CIDR inbound, all traffic
+       outbound: 0.0.0.0/0, all traffic
+   ![Network Settings](images/7_network_settings.png "Network Settings")  
+8. Leave Storage at 2GB
+   ![Storage Settings](images/8_storage_2gb.png "Storage Settings")  
+9. Review and launch
+   ![Review and Launch](images/9_review_and_launch.png "Review and Launch")  
+Wait for Launch
 
