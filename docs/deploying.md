@@ -100,3 +100,10 @@ PrivateSubnetRoute:
         InstanceId: !Ref NatInstance
 ```
 
+## Manual - Web Console
+The following instructions can be used to deploy the fck-nat AMI manually and manipulate the routing table.  
+
+1. Visit the EC2 service in your preferred region: [EC2 Link](https://us-east-2.console.aws.amazon.com/ec2/)
+2. Click Launch Instances
+   ![Launch Instance](images/1_launch_instance.png "Launch Instance")
+
