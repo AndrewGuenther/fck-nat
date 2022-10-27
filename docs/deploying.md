@@ -124,10 +124,11 @@ NOTE: The following example uses AMI version 1.2.0 for arm64 on t4g.nano.
        inbound: entire VPC CIDR inbound, all traffic  
        outbound: 0.0.0.0/0, all traffic  
    ![Network Settings](images/7_network_settings.png "Network Settings")  
-8. Leave Storage at 2GB
+8. Leave Storage at 2GB  
    ![Storage Settings](images/8_storage_2gb.png "Storage Settings")  
-9. Review and launch
+9. Review and launch  
    ![Review and Launch](images/9_review_and_launch.png "Review and Launch")  
+
 Wait for Launch
 
 ### Modify EC2 Network Interface
