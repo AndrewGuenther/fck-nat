@@ -104,6 +104,7 @@ PrivateSubnetRoute:
 The following instructions can be used to deploy the fck-nat AMI manually and manipulate the routing table.  
 NOTE: The following example uses AMI version 1.2.0 for arm64 on t4g.nano.
 
+### EC2 Instance Launch
 1. Visit the EC2 service in your preferred region: [EC2 Link](https://us-east-2.console.aws.amazon.com/ec2/)
 2. Click Launch Instances  
    ![Launch Instance](images/2_launch_instance.png "Launch Instance")
@@ -118,7 +119,7 @@ NOTE: The following example uses AMI version 1.2.0 for arm64 on t4g.nano.
    ![Select t4g.nano](images/6_select_instance_type.png "Select Instance Type")  
 7. Modify Network Settings  
    - Select VPC  
-   - Place in public subnet  
+   - Place in public subnet, ensure Public IP is assigned  
    - Attached Security group that permits  
        inbound: entire VPC CIDR inbound, all traffic  
        outbound: 0.0.0.0/0, all traffic  
@@ -129,3 +130,12 @@ NOTE: The following example uses AMI version 1.2.0 for arm64 on t4g.nano.
    ![Review and Launch](images/9_review_and_launch.png "Review and Launch")  
 Wait for Launch
 
+### Modify EC2 Network Interface
+We must modify the ENI attached to the newly launched instance to disable source/destination checks, this allows us to route _through_ (actually hairpinning) the instance.
+1. Click on the ENI of the instance
+   ![Modify ENI](images/1_open_eni.png "Modify ENI")  
+2. Select ENI, Click Actions -> Change source/dest. check
+   ![change source dest check](images/2_change_source_dest_check.png "Change Source/Dest Check")  
+3. Disable Source/Dest check and Save
+   ![change source dest check](images/3_disable_and_save.png "Disable Source/Dest Check")  
+ 
