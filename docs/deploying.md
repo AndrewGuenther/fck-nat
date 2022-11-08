@@ -100,3 +100,64 @@ PrivateSubnetRoute:
         InstanceId: !Ref NatInstance
 ```
 
+## Manual - Web Console
+The following instructions can be used to deploy the fck-nat AMI manually.  
+**Summary: ** 
+1. Launch fck-nat AMI
+2. Modify ENI to disable source/dest check
+3. Modify the private route table, default route to fck-nat target
+4. Validate
+
+**NOTE:** The following example uses fck-nat AMI version 1.2.0 for arm64 on t4g.nano.
+
+### EC2 Instance Launch
+1. Visit the EC2 service in your preferred region: [EC2 Link](https://us-east-2.console.aws.amazon.com/ec2/)
+2. Click Launch Instances  
+   ![Launch Instance](images/2_launch_instance.png "Launch Instance")
+3. Give the instance a name  
+   ![Name Instance](images/3_name_instance.png "Name Instance")
+4. Search for AMIs owned by "568608671756"
+   ![Search AMI](images/4_search_owner.png "Search AMI Owner")
+5. Select the ARM64 1.2.0 fck-nat AMI  
+   ![Select AMI](images/5_select_ami.png "Select AMI")  
+   ![AMI Selected](images/5.2_ami_selected.png "AMI Selected")  
+6. Select Instance Type t4g.nano  
+   ![Select t4g.nano](images/6_select_instance_type.png "Select Instance Type")  
+7. Modify Network Settings  
+   - Select VPC  
+   - Place in public subnet, ensure Public IP is assigned  
+   - Attached Security group that permits  
+       inbound: entire VPC CIDR inbound, all traffic  
+       outbound: 0.0.0.0/0, all traffic  
+   ![Network Settings](images/7_network_settings.png "Network Settings")  
+8. Leave Storage at 2GB  
+   ![Storage Settings](images/8_storage_2gb.png "Storage Settings")  
+9. Review and launch  
+   ![Review and Launch](images/9_review_and_launch.png "Review and Launch")  
+
+**Wait for Launch**
+
+### Modify EC2 Network Interface
+We must modify the ENI attached to the newly launched instance to disable source/destination checks, this allows us to route _through_ (actually hairpinning) the instance.
+1. Click on the ENI of the instance  
+   ![Modify ENI](images/1_open_eni.png "Modify ENI")  
+2. Select ENI, Click Actions -> Change source/dest. check  
+   ![change source dest check](images/2_change_source_dest_check.png "Change Source/Dest Check")  
+3. Disable Source/Dest check and Save  
+   ![change source dest check](images/3_disable_and_save.png "Disable Source/Dest Check")  
+ 
+### Modify VPC Routing Table
+The VPC routing table associated with your private subnets must be modified to route traffic matching the default route to the new fck-nat instance.  
+1.  Open the VPC Service, Route Tables  
+   ![Route Tables](images/1_route_tables.png "VPC Route Tables")  
+2. Open the private route table, edit routes  
+   ![Edit private route table](images/2_edit_route_table.png "Edit Private Route Table")  
+3. Add a default route, target: fck-nat instance  
+   ![Add default route](images/3_add_new_default_route_to_instance.png "Add default route to fck-nat target")  
+
+### Validate
+Log into an instance in a private subnet and validate the external IP is the public IP assigned to your fck-nat instance.  
+
+![Validate](images/1_validate.png "Validate")  
+
+
