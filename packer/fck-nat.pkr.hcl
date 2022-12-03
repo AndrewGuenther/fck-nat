@@ -1,7 +1,7 @@
 packer {
   required_plugins {
     amazon = {
-      version = ">= 0.0.2"
+      version = ">= 1.0.8"
       source  = "github.com/hashicorp/amazon"
     }
   }
@@ -71,6 +71,7 @@ source "amazon-ebs" "fck-nat" {
   instance_type           = "${lookup(var.instance_type, var.architecture, "error")}"
   region                  = var.region
   ssh_username            = var.ssh_username
+  temporary_key_pair_type = "ed25519"
   source_ami_filter {
     filters = {
       virtualization-type = var.virtualization_type
