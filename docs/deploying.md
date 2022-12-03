@@ -46,10 +46,10 @@ const vpc = new Vpc(this, 'vpc', {
 
 For brevity, this document assumes you already have a VPC with public and private subnets defined in your
 Cloudformation template. This example template provisions the minimum resources required to connect fck-nat in your
-VPC. **This template does not support high availability mode!**
+VPC. This is a good option for those that have an existing VPC and NAT Gateway and are looking to switch over. 
 
 1. A security group allowing ingress traffic from within the VPC and egress out to the internet
-2. An EC2 instance using the fck-nat AMI
+2. A auto scaling group that creates an EC2 instance using the fck-nat AMI
 3. A route in the private subnet route table directing traffic to the fck-nat instance.
 
 This snippet assumes the following resources are already defined:
@@ -58,46 +58,114 @@ This snippet assumes the following resources are already defined:
 2. `PublicSubnet`: An `AWS::EC2::Subnet` which has an `AWS::EC2::InternetGateway` attached.
 3. `PrivateSubnetRouteTable`: An `AWS::EC2::RouteTable` with an `AWS::EC2::SubnetRouteTableAssociation` to a `AWS::EC2::Subnet`
 
+Steps to deploy:
+
+1. Paste your VPC ID, public subnet ID, and CIDR block into the parameters.
+2. Ensure that your public subnet has `Enable auto-assign public IPv4 address` turned on. This can be found in the Console at `VPC > Subnets > Edit subnet settings > Auto-assign IP settings`.
+3. Deploy with cloudformation `aws cloudformation deploy --force-upload --template-file template.yml --stack-name FckNat`
+4. Add the default route to your route table on the subnet. It is best to do this manually so you can do a seamless cut over from your existing nat gateway. Go to `VPC > Route Tables > PUblic route table > Routes > Edit Routes` Add a 0.0.0.0/0 route pointing to the network interface.
+
 ``` yaml
-NatInstanceSecurityGroup:
+Parameters:
+  vpc:
+    Type: String
+    Default: "vpc-121212121212121212"
+  subnet:
+    Type: String
+    Default: "subnet-121212121212121212"
+  CIDR:
+    Type: String
+    Default: "10.0.0.0/16"
+
+Resources:
+  FckNatInterface:
+    Type: AWS::EC2::NetworkInterface
+    Properties:
+      SubnetId: !Sub "${subnet}"
+      GroupSet:
+        - Fn::GetAtt:
+            - NatSecurityGroup
+            - GroupId
+      SourceDestCheck: false
+      
+  FckNatAsgInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - Ref: NatRole
+
+  FckNatAsgLaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId: ami-05b6d5a2e26f13c93
+      InstanceType: t4g.nano
+      IamInstanceProfile:
+        Ref: FckNatAsgInstanceProfile
+      SecurityGroups:
+        - Fn::GetAtt:
+            - NatSecurityGroup
+            - GroupId
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            - - |-
+                #!/bin/bash
+                echo "eni_id=
+              - Ref: FckNatInterface
+              - |-
+                " >> /etc/fck-nat.conf
+                service fck-nat restart
+    DependsOn:
+      - NatRole
+
+  FckNatAsg:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      MaxSize: "1"
+      MinSize: "1"
+      DesiredCapacity: "1"
+      LaunchConfigurationName:
+        Ref: FckNatAsgLaunchConfig
+      VPCZoneIdentifier:
+        - !Sub "${subnet}"
+    UpdatePolicy:
+      AutoScalingScheduledAction:
+        IgnoreUnmodifiedGroupSizeProperties: true
+
+  NatSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-        GroupDescription: "fck-nat Security Group"
-        VpcId: !Ref VPC
-        SecurityGroupIngress:
-        - IpProtocol: tcp
-            FromPort: 0
-            ToPort: 65535
-            CidrIp: !GetAtt VPC.CidrBlock
-        SecurityGroupEgress:
-        - IpProtocol: tcp
-            FromPort: 0
-            ToPort: 65535
-            CidrIp: 0.0.0.0/0
+      GroupDescription: Security Group for NAT
+      SecurityGroupIngress: 
+        - CidrIp: !Sub "{CIDR}"
+          IpProtocol: "-1"
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow all outbound traffic by default
+          IpProtocol: "-1"
+      VpcId: !Sub "${vpc}" 
 
-NatInstance:
-    Type: AWS::EC2::Instance
+  NatRole:
+    Type: AWS::IAM::Role
     Properties:
-        # You can find the latest public AMI ID with the following command:
-        # aws ec2 describe-images --owners 568608671756 --filters 'Name=name,Values=fck-nat-amzn2-*'
-        ImageId: ami-005e79c34846da0a4
-        InstanceType: t4g.nano
-        SourceDestCheck: false
-        NetworkInterfaces:
-        - AssociatePublicIpAddress: true
-            SubnetId: !Ref PublicSubnet
-            DeleteOnTermination: true
-            DeviceIndex: 0
-            GroupSet:
-            - !Ref NatInstanceSecurityGroup
-
-PrivateSubnetRoute:
-    Type: AWS::EC2::Route
-    DependsOn: NatInstance
-    Properties:
-        RouteTableId: !Ref PrivateSubnetRouteTable
-        DestinationCidrBlock: 0.0.0.0/0
-        InstanceId: !Ref NatInstance
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+        Version: "2012-10-17"
+      Policies:
+        - PolicyDocument:
+            Statement:
+              - Action:
+                  - ec2:AttachNetworkInterface
+                  - ec2:ModifyNetworkInterfaceAttribute
+                Effect: Allow
+                Resource: "*"
+            Version: "2012-10-17"
+          PolicyName: attachNatEniPolicy
 ```
 
 ## Manual - Web Console
