@@ -14,7 +14,10 @@ if test -n "$eni_id"; then
     instance_id="$(/opt/aws/bin/ec2-metadata -i | cut -f2 -d' ')"
 
     eth0_mac="$(cat /sys/class/net/eth0/address)"
-    eth0_eni_id="$(curl http://169.254.169.254/latest/meta-data/network/interfaces/macs/$eth0_mac/interface-id)"
+    
+    token="$(curl -X PUT -H 'X-aws-ec2-metadata-token-ttl-seconds: 300' http://169.254.169.254/latest/api/token)"
+    eth0_eni_id="$(curl -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/meta-data/network/interfaces/macs/$eth0_mac/interface-id)"
+    
     aws ec2 modify-network-interface-attribute \
         --region "$aws_region" \
         --network-interface-id "$eth0_eni_id" \
