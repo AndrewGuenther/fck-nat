@@ -138,7 +138,7 @@ Resources:
     Properties:
       GroupDescription: Security Group for NAT
       SecurityGroupIngress: 
-        - CidrIp: !Sub "{CIDR}"
+        - CidrIp: !Sub "${CIDR}"
           IpProtocol: "-1"
       SecurityGroupEgress:
         - CidrIp: 0.0.0.0/0
