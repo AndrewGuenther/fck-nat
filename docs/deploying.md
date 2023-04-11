@@ -97,7 +97,7 @@ Resources:
   FckNatAsgLaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
-      ImageId: ami-0591f971d15aec0ab
+      ImageId: ami-05b6d5a2e26f13c93
       InstanceType: t4g.nano
       IamInstanceProfile:
         Ref: FckNatAsgInstanceProfile
