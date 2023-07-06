@@ -63,7 +63,7 @@ Steps to deploy:
 1. Paste your VPC ID, public subnet ID, and CIDR block into the parameters.
 2. Ensure that your public subnet has `Enable auto-assign public IPv4 address` turned on. This can be found in the Console at `VPC > Subnets > Edit subnet settings > Auto-assign IP settings`.
 3. Deploy with cloudformation `aws cloudformation deploy --force-upload --template-file template.yml --stack-name FckNat`
-4. Add the default route to your route table on the subnet. It is best to do this manually so you can do a seamless cut over from your existing nat gateway. Go to `VPC > Route Tables > PUblic route table > Routes > Edit Routes` Add a 0.0.0.0/0 route pointing to the network interface.
+4. Add the default route to your route table on the subnet. It is best to do this manually so you can do a seamless cut over from your existing nat gateway. Go to `VPC > Route Tables > Private route table > Routes > Edit Routes` Add a 0.0.0.0/0 route pointing to the network interface.
 
 ``` yaml
 Parameters:
