@@ -2,6 +2,9 @@
 Description = Configure this machine to act as a NAT instance. fck-nat.
 Wants = network-online.target
 After = network-online.target
+# Make sure that the service starts only after cloud init so the EC2 user data
+# script can be executed prior to checking if /etc/fck-nat.conf exists
+After = cloud-final.service
 
 [Service]
 ExecStart = /opt/fck-nat/fck-nat.sh
