@@ -23,11 +23,14 @@ if test -n "$eni_id"; then
         --network-interface-id "$eth0_eni_id" \
         --no-source-dest-check
 
-    aws ec2 attach-network-interface \
+    while ! aws ec2 attach-network-interface \
         --region "$aws_region" \
         --instance-id "$instance_id" \
         --device-index 1 \
-        --network-interface-id "$eni_id"
+        --network-interface-id "$eni_id"; do
+        echo "Waiting for ENI to attach..."
+        sleep 5
+    done
 
     while ! ip link show dev eth1; do
         echo "Waiting for ENI to come up..."
