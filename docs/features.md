@@ -4,12 +4,14 @@
 
 fck-nat can operate on a single instance, or withing an autoscaling group for improved availability. When running in an
 autoscaling group, fck-nat can be configured to always attach a specific ENI at start-up, allowing fck-nat to maintain
-a consistent internal-facing IP address.
+a consistent internal-facing IP address. Additionally, it is also possible to configure an already allocated EIP address
+that would be carried through instance refreshs.
 
-To enable this feature, you'll need to create a config file at `/etc/fck-nat.conf` like this:
+To enable these features, you'll need to create a config file at `/etc/fck-nat.conf` like this:
 
 ```
 eni_id=<YOUR_ENI_ID>
+eip_id=<YOUR_EIP_ALLOCATION_ID>
 ```
 
 Once the fck-nat configuration is created, be sure to restart the service by running `service fck-nat restart`.

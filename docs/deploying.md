@@ -166,6 +166,15 @@ Resources:
                 Resource: "*"
             Version: "2012-10-17"
           PolicyName: attachNatEniPolicy
+        - PolicyDocument:
+            Statement:
+              - Action:
+                  - ec2:AssociateAddress
+                  - ec2:DisassociateAddress
+                Effect: Allow
+                Resource: "*"
+            Version: "2012-10-17"
+          PolicyName: attachNatEniPolicy
 ```
 
 ## Manual - Web Console
