@@ -18,6 +18,7 @@ theme:
 nav:
   - Introduction: index.md
   - Deploying: deploying.md
+  - Configuration: configuration.md
   - Features: features.md
 
 repo_url: https://github.com/AndrewGuenther/fck-nat

@@ -96,7 +96,8 @@ build {
 
   provisioner "shell" {
     inline = [
-      "sudo yum --nogpgcheck -y localinstall /tmp/fck-nat-${var.version}-any.rpm"
+      "sudo yum --nogpgcheck -y localinstall /tmp/fck-nat-${var.version}-any.rpm",
+      "sudo yum install amazon-cloudwatch-agent -y"
     ]
   }
 }
