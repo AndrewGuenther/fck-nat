@@ -15,11 +15,13 @@ documentation on [Construct Hub](https://constructs.dev/packages/cdk-fck-nat/v/1
 CDK construct in Typescript:
 
 ``` ts
-const vpc = new Vpc(this, 'vpc', {
-    natGatewayProvider: new FckNatInstanceProvider({
-        instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO),
-    }),
+const natGatewayProvier = new FckNatInstanceProvider({
+    instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO),
 });
+const vpc = new Vpc(this, 'vpc', {
+    natGatewayProvider,
+});
+natGatewayProvider.securityGroup.addIngressRule(Peer.ipv4(vpc.vpcCidrBlock), Port.allTraffic());
 ```
 
 That's it! This will deploy your VPC using fck-nat as your NAT provider in high availability mode. This includes all
@@ -29,15 +31,17 @@ up automatically in case the NAT instance is terminated.
 You can also deploy fck-nat in non-HA mode using CDK's built-in `NatInstanceProvider` like so:
 
 ``` ts
+const natGatewayProvider = new NatInstanceProvider({
+    instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO),
+    machineImage: new LookupMachineImage({
+        name: 'fck-nat-amzn2-*-arm64-ebs',
+        owners: ['568608671756'],
+    })
+})
 const vpc = new Vpc(this, 'vpc', {
-    natGatewayProvider: new NatInstanceProvider({
-        instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO),
-        machineImage: new LookupMachineImage({
-            name: 'fck-nat-amzn2-*-arm64-ebs',
-            owners: ['568608671756'],
-        })
-    }),
+    natGatewayProvider,
 });
+natGatewayProvider.securityGroup.addIngressRule(Peer.ipv4(vpc.vpcCidrBlock), Port.allTraffic());
 ```
 
 [Read more about the `NatInstanceProvider` construct](https://docs.aws.amazon.com/cdk/api/latest/docs/@aws-cdk_aws-ec2.NatInstanceProvider.html)
