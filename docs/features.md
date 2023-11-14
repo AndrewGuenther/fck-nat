@@ -76,3 +76,18 @@ Ensure you are aware of Cloudwatch metrics costs before enabling Cloudwatch agen
 cost you about $17/monthly, excluding free tier.  
 
 **IAM requirements**: `ssm:GetParameter` on the SSM Parameter ARN, and `cloudwatch:PutMetricData` on `*`.
+
+## Session Manager
+
+fck-nat disables SSH by default in favour of Session Manager available through Amazon SSM Agent. Connecting to the
+instance may be achieved either directly through the AWS console, or via the command
+`aws ssm start-session --target i-abc1234` provided you have required IAM permission.  
+
+If you wish to use SSH nonetheless, you may re-enable the service through EC2's user-data with the following commands:
+```
+sudo systemctl unmask sshd
+sudo systemctl enable sshd
+sudo systemctl start sshd
+```  
+
+**IAM requirements**: Attach AWS managed policy `AmazonSSMManagedInstanceCore` to the role of your instance profile. 
