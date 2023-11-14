@@ -72,7 +72,7 @@ provided in the managed NAT Gateway:
 }
 ```
 
-Ensure you are aware of Cloudwatch metrics costs before enabling the Cloudwatch agent. The above configuration would
+Ensure you are aware of Cloudwatch metrics costs before enabling Cloudwatch agent. The above configuration would
 cost you about $17/monthly, excluding free tier.  
 
 **IAM requirements**: `ssm:GetParameter` on the SSM Parameter ARN, and `cloudwatch:PutMetricData` on `*`.
