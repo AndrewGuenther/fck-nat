@@ -16,7 +16,7 @@ Those features are controlled by `eni_id` and `eip_id` directive in the configur
 
 One of the objectives of fck-nat is to offer as close as possible metric parity with Managed NAT Gateway. While the
 project supports various metrics similar to the managed NAT Gateway via Cloudwatch agent, each provider is responsible
-for passing their configuration to the agent via fck-nat's `cwagent_enabled`, and `cwagent_cfg_param_arn` directives
+for passing their configuration to the agent via fck-nat's `cwagent_enabled`, and `cwagent_cfg_param_name` directives
 within its configuration file.
 
 As an example, you might use the following configuration file which have Cloudwatch agent report most of metrics
