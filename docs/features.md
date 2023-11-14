@@ -7,7 +7,10 @@ autoscaling group, fck-nat can be configured to always attach a specific ENI at 
 a consistent internal-facing IP address. Additionally, it is also possible to configure an already allocated EIP address
 that would be carried through instance refreshs.
 
-Those features are controlled by `eni_id` and `eip_id` directive in the configuration file.
+Those features are controlled by `eni_id` and `eip_id` directive in the configuration file.  
+
+**IAM requirements**: `ec2:AttachNetworkInterface`, `ec2:ModifyNetworkInterfaceAttribute` on `*` for ha-mode, plus
+`ec2:AssociateAddress`, `ec2:DisassociateAddress` on `*` when using a static EIP.
 
 ## Metrics
 
@@ -47,6 +50,15 @@ provided in the managed NAT Gateway:
           { "name": "tcp_established", "rename": "ConnectionEstablishedCount",  "unit": "Count" }
         ]
       },
+      "ethtool": {
+        "interface_include": ["eth0", "eth1"],
+        "metrics_include": [
+          "bw_in_allowance_exceeded",
+          "bw_out_allowance_exceeded",
+          "conntrack_allowance_exceeded",
+          "pps_allowance_exceeded"
+        ]
+      },
       "mem": {
         "measurement": [
           { "name": "used_percent", "rename": "MemoryUsed",  "unit": "Percent" }
@@ -60,5 +72,7 @@ provided in the managed NAT Gateway:
 }
 ```
 
-If this feature is important to you, help us prioritize it by +1'ing the following issue: [Report additional metrics
-from fck-nat](https://github.com/AndrewGuenther/fck-nat/issues/16)
+Ensure you are aware of Cloudwatch metrics costs before enabling the Cloudwatch agent. The above configuration would
+cost you about $17/monthly, excluding free tier.  
+
+**IAM requirements**: `ssm:GetParameter` on the SSM Parameter ARN, and `cloudwatch:PutMetricData` on `*`.
