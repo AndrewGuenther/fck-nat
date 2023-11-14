@@ -70,4 +70,10 @@ iptables -t nat -F
 echo "Adding NAT rule..."
 iptables -t nat -A POSTROUTING -o "$nat_interface" -j MASQUERADE -m comment --comment "NAT routing rule installed by fck-nat"
 
+if test -n "$cwagent_enabled" && test -n "$cwagent_cfg_param_name"; then
+    echo "Found cwagent_enabled and cwagent_cfg_param_name configuration, starting CloudWatch agent..."
+    systemctl enable amazon-cloudwatch-agent
+    /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c "ssm:$cwagent_cfg_param_name"
+fi
+
 echo "Done!"
