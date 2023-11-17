@@ -100,8 +100,7 @@ build {
       "sudo yum install amazon-cloudwatch-agent -y",
       "sudo yum install amazon-ssm-agent -y",
       "sudo systemctl disable sshd",
-      "sudo systemctl mask sshd",
-      "sudo yum remove postfix -y"
+      "sudo systemctl mask sshd"
     ]
   }
 }
