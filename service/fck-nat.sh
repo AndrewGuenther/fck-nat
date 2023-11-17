@@ -33,19 +33,23 @@ if test -n "$eni_id"; then
         --network-interface-id "$eth0_eni_id" \
         --no-source-dest-check
 
-    while ! aws ec2 attach-network-interface \
-        --region "$aws_region" \
-        --instance-id "$instance_id" \
-        --device-index 1 \
-        --network-interface-id "$eni_id"; do
-        echo "Waiting for ENI to attach..."
-        sleep 5
-    done
+    if ! ip link show dev eth1; then
+        while ! aws ec2 attach-network-interface \
+            --region "$aws_region" \
+            --instance-id "$instance_id" \
+            --device-index 1 \
+            --network-interface-id "$eni_id"; do
+            echo "Waiting for ENI to attach..."
+            sleep 5
+        done
 
-    while ! ip link show dev eth1; do
-        echo "Waiting for ENI to come up..."
-        sleep 1
-    done
+        while ! ip link show dev eth1; do
+            echo "Waiting for ENI to come up..."
+            sleep 1
+        done
+    else
+        echo "eth1 already exists, skipping ENI attachment..."
+    fi
 
     nat_interface="eth0"
 elif test -n "$interface"; then
