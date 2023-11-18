@@ -96,6 +96,16 @@ build {
 
   provisioner "shell" {
     inline = [
+      "sudo yum install bzip2 gcc make -y",
+      "curl http://www.litech.org/tayga/tayga-0.9.2.tar.bz2 -o- | bzip2 -d | tar xvf -",
+      "cd tayga-0.9.2",
+      "./configure && make && sudo make install",
+      "sudo mkdir -p /var/db/tayga"
+    ]
+  }
+
+  provisioner "shell" {
+    inline = [
       "sudo yum --nogpgcheck -y localinstall /tmp/fck-nat-${var.version}-any.rpm",
       "sudo yum install amazon-cloudwatch-agent -y"
     ]

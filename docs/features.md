@@ -76,3 +76,14 @@ Ensure you are aware of Cloudwatch metrics costs before enabling Cloudwatch agen
 cost you about $17/monthly, excluding free tier.  
 
 **IAM requirements**: `ssm:GetParameter` on the SSM Parameter ARN, and `cloudwatch:PutMetricData` on `*`.
+
+## NAT64
+
+fck-nat features NAT64 provided through [TAYGA](http://www.litech.org/tayga/) as a mean to allow IPv6-only networks to
+communicate with external IPv4 networks, working seamlessly with the AWS' DNS64 feature. It's important to note that
+TAYGA comes with its constraint, such as the need of supplying a pool of IPv4 meant to map IPv6 addresses into IPv4, and
+therefore needing to set an unused range across your VPC or peered connections. Refer to [TAYGA's documentation](http://www.litech.org/tayga/README-0.9.2)
+for more information.
+
+Enabling NAT64 can be done by setting `nat64_enabled`, and supports `nat64_ipv4_addr`, `nat64_ipv6_addr`, and
+`nat64_ipv4_dynamic_pool` in fck-nat configuration file. 
