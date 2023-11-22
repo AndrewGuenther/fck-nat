@@ -47,28 +47,41 @@ if test -n "$eni_id"; then
         sleep 1
     done
 
-    nat_interface="eth0"
+    nat_public_interface="eth0"
+    nat_private_interface="eth1"
 elif test -n "$interface"; then
     echo "Found interface configuration, using $interface"
-    nat_interface=$interface
+    nat_public_interface=$interface
+    nat_private_interface=$nat_public_interface
 else
-    nat_interface=$(ip route | grep default | cut -d ' ' -f 5)
-    echo "No eni_id or interface configuration found, using default interface $nat_interface"
+    nat_public_interface=$(ip route | grep default | cut -d ' ' -f 5)
+    nat_private_interface=$nat_public_interface
+    echo "No eni_id or interface configuration found, using default interface $nat_public_interface"
 fi
 
-echo "Enabling ip_forward..."
+echo "Setting up NAT64..."
+modprobe jool
+/usr/local/bin/jool instance flush
+/usr/local/bin/jool instance add --netfilter --pool6 64:ff9b::/96
+
+echo "Enabling IPv4 forwarding..."
 sysctl -q -w net.ipv4.ip_forward=1
 
-echo "Disabling reverse path protection..."
+echo "Disabling IPv4 reverse path protection..."
 for i in $(find /proc/sys/net/ipv4/conf/ -name rp_filter) ; do
   echo 0 > $i;
 done
 
-echo "Flushing NAT table..."
+echo "Flushing IPv4 NAT table..."
 iptables -t nat -F
 
-echo "Adding NAT rule..."
-iptables -t nat -A POSTROUTING -o "$nat_interface" -j MASQUERADE -m comment --comment "NAT routing rule installed by fck-nat"
+echo "Adding IPv4 NAT rules..."
+iptables -t nat -A POSTROUTING -o "$nat_public_interface" -j MASQUERADE -m comment --comment "NAT routing rule installed by fck-nat"
+
+echo "Enabling IPv6 forwarding..."
+sysctl -q -w net.ipv6.conf."$nat_public_interface".accept_ra=2
+sysctl -q -w net.ipv6.conf."$nat_private_interface".accept_ra=2
+sysctl -q -w net.ipv6.conf.all.forwarding=1
 
 if test -n "$cwagent_enabled" && test -n "$cwagent_cfg_param_name"; then
     echo "Found cwagent_enabled and cwagent_cfg_param_name configuration, starting CloudWatch agent..."

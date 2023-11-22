@@ -62,6 +62,10 @@ variable "ssh_username" {
   default = "ec2-user"
 }
 
+variable "jool_version" {
+  default = "4.1.7"
+}
+
 source "amazon-ebs" "fck-nat" {
   ami_name                = "fck-nat-${var.flavor}-${var.virtualization_type}-${var.version}-${formatdate("YYYYMMDD", timestamp())}-${var.architecture}-ebs"
   ami_virtualization_type = var.virtualization_type
@@ -89,14 +93,38 @@ build {
   name = "fck-nat"
   sources = ["source.amazon-ebs.fck-nat"]
 
+  # Install updates
+  provisioner "shell" {
+    inline = [
+      "sudo yum update -y",
+      "sudo reboot"
+    ]
+    expect_disconnect = true
+  }
+
+  # Install jool for NAT64
+  provisioner "shell" {
+    start_retry_timeout = "2m"
+    inline = [
+      "sudo yum install gcc make elfutils-libelf-devel kernel-devel libnl3-devel iptables-devel dkms -y",
+      "curl -L https://www.jool.mx/download/jool-${var.jool_version}.tar.gz -o- | tar xzf - --directory /tmp",
+      "sudo dkms install /tmp/jool-${var.jool_version}",
+      "cd /tmp/jool-${var.jool_version}",
+      "./configure && make && sudo make install",
+      "sudo rm -rf /tmp/jool-${var.jool_version}"
+    ]
+  }
+  
   provisioner "file" {
     source = "build/fck-nat-${var.version}-any.rpm"
     destination = "/tmp/fck-nat-${var.version}-any.rpm"
   }
 
+  # Install fck-nat
   provisioner "shell" {
     inline = [
       "sudo yum --nogpgcheck -y localinstall /tmp/fck-nat-${var.version}-any.rpm",
+      "sudo rm -f /tmp/fck-nat-${var.version}-any.rpm",
       "sudo yum install amazon-cloudwatch-agent -y"
     ]
   }
