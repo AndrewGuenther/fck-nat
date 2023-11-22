@@ -178,7 +178,7 @@ Resources:
                 Effect: Allow
                 Resource: "*"
             Version: "2012-10-17"
-          PolicyName: attachNatEniPolicy
+          PolicyName: associateNatAddressPolicy
 ```
 
 ## Manual - Web Console
