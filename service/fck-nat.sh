@@ -48,7 +48,13 @@ if test -n "$eni_id"; then
             sleep 1
         done
     else
-        echo "eth1 already exists, skipping ENI attachment..."
+        echo "eth1 already exists, skipping ENI attachment"
+        eth1_mac="$(cat /sys/class/net/eth1/address)"
+        eth1_eni_id="$(curl -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/meta-data/network/interfaces/macs/$eth1_mac/interface-id)"
+        if test "$eth1_eni_id" != "$eni_id"; then
+            echo "The attached ENI on eth1 ($eth1_eni_id) does not match the configured ENI ($eni_id), aborting"
+            exit 1
+        fi
     fi
 
     nat_interface="eth0"
