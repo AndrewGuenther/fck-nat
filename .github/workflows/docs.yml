@@ -13,5 +13,9 @@ jobs:
           python-version: 3.x
       - name: Install Docs Dependencies
         run: pip install mkdocs-material mike
+      - name: Setup Docs Deploy
+        run: |
+          git config --global user.name "Docs Deploy"
+          git config --global user.email "docs.deploy@fck-nat.dev"
       - name: Deploy Development Docs
         run: mike deploy --push develop
