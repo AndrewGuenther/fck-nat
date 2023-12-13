@@ -46,6 +46,69 @@ natGatewayProvider.securityGroup.addIngressRule(Peer.ipv4(vpc.vpcCidrBlock), Por
 
 [Read more about the `NatInstanceProvider` construct](https://docs.aws.amazon.com/cdk/api/latest/docs/@aws-cdk_aws-ec2.NatInstanceProvider.html)
 
+## Terraform
+
+Doriann Corlouër ([RaJiska](https://github.com/RaJiska/)) maintains the official fck-nat Terraform module over at
+[terraform-aws-fck-nat](https://github.com/RaJiska/terraform-aws-fck-nat). Below is a sample of how to use that module
+and full documentation can be found on the
+[Terraform Registry](https://registry.terraform.io/modules/RaJiska/fck-nat/aws/latest)
+
+```hcl
+module "fck-nat" {
+  source = "RaJiska/fck-nat/aws"
+
+  name                 = "my-fck-nat"
+  vpc_id               = "vpc-abc1234"
+  subnet_id            = "subnet-abc1234"
+  # ha_mode              = true                 # Enables high-availability mode
+  # eip_allocation_ids   = ["eipalloc-abc1234"] # Allocation ID of an existing EIP
+  # use_cloudwatch_agent = true                 # Enables Cloudwatch agent and have metrics reported
+
+  update_route_tables = true
+  route_tables_ids = {
+    "your-rtb-name-A" = "rtb-abc1234Foo"
+    "your-rtb-name-B" = "rtb-abc1234Bar"
+  }
+}
+```
+
+It is also possible to configure fck-nat with out-of-the-box Terraform modules, but you may not be able to leverage all
+of fck-nat's features.
+
+```hcl
+data "aws_ami" "fck_nat" {
+  filter {
+    name   = "name"
+    values = ["fck-nat-amzn2-*"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["arm64"]
+  }
+
+  owners      = ["568608671756"]
+  most_recent = true
+}
+
+resource "aws_network_interface" "fck-nat-if" {
+  subnet_id       = aws_subnet.subnet_public.id
+  security_groups = [aws_default_security_group.default_security_group.id]
+
+  source_dest_check = false
+}
+
+resource "aws_instance" "fck-nat" {                                                   
+  ami           = data.aws_ami.fck_nat.id
+  instance_type = "t4g.nano"
+
+  network_interface {
+    network_interface_id = aws_network_interface.fck-nat-if.id
+    device_index         = 0
+  }                                                                              
+}
+```
+
 ## Cloudformation
 
 For brevity, this document assumes you already have a VPC with public and private subnets defined in your
