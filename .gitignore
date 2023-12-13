@@ -10,6 +10,10 @@ cdk.context.json
 
 # Build folder
 /build
+/docs_build
 
 # Env files
 .env
+
+# Python venv (for docs)
+.venv

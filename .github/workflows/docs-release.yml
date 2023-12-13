@@ -1,4 +1,4 @@
-name: Build/Publish Develop Docs
+name: Build/Publish Release Docs
 on:
   push:
     branches:
@@ -13,5 +13,5 @@ jobs:
           python-version: 3.x
       - name: Install Docs Dependencies
         run: pip install mkdocs-material mike
-      - name: Deploy Development Docs
-        run: mike deploy --push develop
+      - name: Build Docs Website
+        run: mike deploy --push --update-aliases ${{ github.event.release.tag_name }} latest
