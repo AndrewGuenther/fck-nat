@@ -1,8 +1,7 @@
-name: Build/Publish Develop Docs
+name: Build/Publish Latest Release Docs
 on:
-  push:
-    branches:
-      - main
+  release:
+    types: [published]
 permissions:
   contents: write
 jobs:
@@ -17,10 +16,10 @@ jobs:
           python-version: 3.10.6
       - name: Install Dependencies
         run: |
-          pip install -r requirements-docs.txt
+          pip install mkdocs-material mike
       - name: Setup Docs Deploy
         run: |
           git config --global user.name "Docs Deploy"
           git config --global user.email "docs.deploy@fck-nat.dev"
       - name: Build Docs Website
-        run: mike deploy --push develop
+        run: mike deploy --push --update-aliases ${{ github.event.release.tag_name }}
