@@ -36,7 +36,7 @@ variable "architecture" {
 }
 
 variable "flavor" {
-  default = "amzn2"
+  default = "al2023"
 }
 
 variable "instance_type" {
@@ -51,7 +51,7 @@ variable "region" {
 }
 
 variable "base_image_name" {
-  default = "*amzn2-ami-minimal-*"
+  default = "*al2023-ami-minimal-*-kernel-*"
 }
 
 variable "base_image_owner" {
@@ -97,8 +97,8 @@ build {
 
   provisioner "shell" {
     inline = [
+      "sudo yum install amazon-cloudwatch-agent iptables -y",
       "sudo yum --nogpgcheck -y localinstall /tmp/fck-nat-${var.version}-any.rpm",
-      "sudo yum install amazon-cloudwatch-agent -y"
     ]
   }
 }

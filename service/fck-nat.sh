@@ -7,10 +7,12 @@ else
     echo "No fck-nat configuration at /etc/fck-nat.conf"
 fi
 
-aws_region="$(/opt/aws/bin/ec2-metadata -z | cut -f2 -d' ' | sed 's/.$//')"
-eth0_mac="$(cat /sys/class/net/eth0/address)"
 token="$(curl -X PUT -H 'X-aws-ec2-metadata-token-ttl-seconds: 300' http://169.254.169.254/latest/api/token)"
-eth0_eni_id="$(curl -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/meta-data/network/interfaces/macs/$eth0_mac/interface-id)"
+instance_id="$(curl -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/meta-data/instance-id)"
+aws_region="$(curl -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/meta-data/placement/region)"
+outbound_mac="$(curl -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/meta-data/mac)"
+outbound_eni_id="$(curl -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/meta-data/network/interfaces/macs/$outbound_mac/interface-id)"
+nat_interface=$(ip link show dev "$outbound_eni_id" | head -n 1 | awk '{print $2}' | sed s/://g )
 
 if test -n "$eip_id"; then
     echo "Found eip_id configuration, associating $eip_id..."
@@ -18,7 +20,7 @@ if test -n "$eip_id"; then
     aws ec2 associate-address \
         --region "$aws_region" \
         --allocation-id "$eip_id" \
-        --network-interface-id "$eth0_eni_id" \
+        --network-interface-id "$outbound_eni_id" \
         --allow-reassociation
     sleep 3
 fi
@@ -26,14 +28,12 @@ fi
 if test -n "$eni_id"; then
     echo "Found eni_id configuration, attaching $eni_id..."
 
-    instance_id="$(/opt/aws/bin/ec2-metadata -i | cut -f2 -d' ')"
-
     aws ec2 modify-network-interface-attribute \
         --region "$aws_region" \
-        --network-interface-id "$eth0_eni_id" \
+        --network-interface-id "$outbound_eni_id" \
         --no-source-dest-check
 
-    if ! ip link show dev eth1; then
+    if ! ip link show dev "$eni_id"; then
         while ! aws ec2 attach-network-interface \
             --region "$aws_region" \
             --instance-id "$instance_id" \
@@ -43,26 +43,17 @@ if test -n "$eni_id"; then
             sleep 5
         done
 
-        while ! ip link show dev eth1; do
+        while ! ip link show dev "$eni_id"; do
             echo "Waiting for ENI to come up..."
             sleep 1
         done
     else
-        echo "eth1 already exists, skipping ENI attachment"
-        eth1_mac="$(cat /sys/class/net/eth1/address)"
-        eth1_eni_id="$(curl -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/meta-data/network/interfaces/macs/$eth1_mac/interface-id)"
-        if test "$eth1_eni_id" != "$eni_id"; then
-            echo "The attached ENI on eth1 ($eth1_eni_id) does not match the configured ENI ($eni_id), aborting"
-            exit 1
-        fi
+        echo "$eni_id already attached, skipping ENI attachment"
     fi
-
-    nat_interface="eth0"
 elif test -n "$interface"; then
     echo "Found interface configuration, using $interface"
     nat_interface=$interface
 else
-    nat_interface=$(ip route | grep default | cut -d ' ' -f 5)
     echo "No eni_id or interface configuration found, using default interface $nat_interface"
 fi
 

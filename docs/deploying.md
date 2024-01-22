@@ -34,7 +34,7 @@ You can also deploy fck-nat in non-HA mode using CDK's built-in `NatInstanceProv
 const natGatewayProvider = new NatInstanceProvider({
     instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO),
     machineImage: new LookupMachineImage({
-        name: 'fck-nat-amzn2-*-arm64-ebs',
+        name: 'fck-nat-al2023-*-arm64-ebs',
         owners: ['568608671756'],
     })
 })
@@ -79,7 +79,7 @@ of fck-nat's features.
 data "aws_ami" "fck_nat" {
   filter {
     name   = "name"
-    values = ["fck-nat-amzn2-*"]
+    values = ["fck-nat-al2023-*"]
   }
 
   filter {
