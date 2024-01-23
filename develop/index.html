@@ -593,7 +593,7 @@ different base image or host the AMI yourself, you can build your own AMI.</p>
 <code>packer/fck-nat-public-all-regions.pkrvars.hcl</code>. While arm64 images are the most cost effective, x86_64 images are also
 available. You can get view the available fck-nat AMIs with the following query:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a># Amazon Linux 2 based AMIs
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>aws ec2 describe-images --owners 568608671756 --filters &#39;Name=name,Values=fck-nat-amzn2-*&#39;
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>aws ec2 describe-images --owners 568608671756 --filters &#39;Name=name,Values=fck-nat-al2023-*&#39;
 </code></pre></div>
 <h4 id="building-your-own-fck-nat-ami">Building your own fck-nat AMI</h4>
 <p>fck-nat images are built using <a href="https://www.packer.io/">Packer</a>. You can find the Packer files we use to build the
