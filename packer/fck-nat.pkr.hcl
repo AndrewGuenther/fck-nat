@@ -113,6 +113,7 @@ build {
       "cd /tmp/jool-${var.jool_version}",
       "./configure && make && sudo make install",
       "sudo rm -rf /tmp/jool-${var.jool_version}"
+      "sudo yum uninstall gcc make elfutils-libelf-devel kernel-devel libnl3-devel iptables-devel -y"
     ]
   }
   
