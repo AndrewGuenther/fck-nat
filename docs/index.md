@@ -61,7 +61,7 @@ available. You can get view the available fck-nat AMIs with the following query:
 
 ```
 # Amazon Linux 2 based AMIs
-aws ec2 describe-images --owners 568608671756 --filters 'Name=name,Values=fck-nat-amzn2-*'
+aws ec2 describe-images --owners 568608671756 --filters 'Name=name,Values=fck-nat-al2023-*'
 ```
 
 #### Building your own fck-nat AMI
