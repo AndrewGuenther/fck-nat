@@ -16,6 +16,8 @@
         <link rel="prev" href="../configuration/">
       
       
+        <link rel="next" href="../limitations/">
+      
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.2">
@@ -80,6 +82,23 @@
       
     </div>
     <div data-md-component="announce">
+      
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+              <button class="md-banner__button md-icon" aria-label="Don't show this again">
+                
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+              </button>
+            
+            
+  Hey! fck-nat is free and open source, but hosting the AMIs does incur some costs. <a href="https://ko-fi.com/codebrewed">Consider supporting me on Ko-fi ❤️</a>
+
+          </div>
+          
+            <script>var content,el=document.querySelector("[data-md-component=announce]");el&&(content=el.querySelector(".md-typeset"),__md_hash(content.innerHTML)===__md_get("__announce")&&(el.hidden=!0))</script>
+          
+        </aside>
       
     </div>
     
@@ -277,6 +296,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../choosing_an_instance_size/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Choosing an Instance Size
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../deploying/" class="md-nav__link">
         
   
@@ -372,6 +411,24 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#static-ip" class="md-nav__link">
+    <span class="md-ellipsis">
+      Static IP
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ssm-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      SSM Agent
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#metrics" class="md-nav__link">
     <span class="md-ellipsis">
       Metrics
@@ -384,6 +441,26 @@
   
 </nav>
       
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../limitations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Limitations
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -424,6 +501,24 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#static-ip" class="md-nav__link">
+    <span class="md-ellipsis">
+      Static IP
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ssm-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      SSM Agent
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#metrics" class="md-nav__link">
     <span class="md-ellipsis">
       Metrics
@@ -451,14 +546,27 @@
 
 
 <h1 id="fck-nat-features">fck-nat Features</h1>
+<div class="admonition info">
+<p class="admonition-title">Heads up!</p>
+<p>The easiest way to get all of the features below is to use the official <a href="../deploying/#cdk">CDK</a> or
+<a href="../deploying/#terraform">Terraform</a> modules!</p>
+</div>
 <h2 id="high-availability-mode">High-availability Mode</h2>
-<p>fck-nat can operate on a single instance, or withing an autoscaling group for improved availability. When running in an
+<p>fck-nat can operate on a single instance, or within an autoscaling group for improved availability. When running in an
 autoscaling group, fck-nat can be configured to always attach a specific ENI at start-up, allowing fck-nat to maintain
-a consistent internal-facing IP address. Additionally, it is also possible to configure an already allocated EIP address
-that would be carried through instance refreshs.</p>
-<p>Those features are controlled by <code>eni_id</code> and <code>eip_id</code> directive in the configuration file.  </p>
-<p><strong>IAM requirements</strong>: <code>ec2:AttachNetworkInterface</code>, <code>ec2:ModifyNetworkInterfaceAttribute</code> on <code>*</code> for ha-mode, plus
-<code>ec2:AssociateAddress</code>, <code>ec2:DisassociateAddress</code> on <code>*</code> when using a static EIP.</p>
+a static internal-facing IP address. (For information on static external IPs, see: <a href="#static-ip">Static IP</a>)</p>
+<p>This feature is controlled via the <code>eni_id</code> directive in the <a href="../configuration/#configuration-file">configuration file</a>
+and also requires additional IAM permissions to function, see: <a href="../configuration/#iam-requirements">IAM Requirements</a></p>
+<h2 id="static-ip">Static IP</h2>
+<p>If you wish for your NAT instance to maintain a consistent external facing IP, fck-nat supports automatically
+association of an Elastic IP (EIP) addresss at launch.</p>
+<p>This feature is controlled via the <code>eip_id</code> directive in the <a href="../configuration/#configuration-file">configuration file</a>
+and also requires additional IAM permissions to function, see: <a href="../configuration/#iam-requirements">IAM Requirements</a></p>
+<h2 id="ssm-agent">SSM Agent</h2>
+<p>The Amazon SSM Agent is installed in the fck-nat AMI by default to allow SSH-less access to instances as well as
+automated patching capabilities if you so choose (The fck-nat AMI also has kernel live patching modules enabled). To
+enable access via SSM, you just need to make sure that your fck-nat instance has the requisite
+<a href="../configuration/#iam-requirements">IAM permissions attached</a></p>
 <h2 id="metrics">Metrics</h2>
 <p>One of the objectives of fck-nat is to offer as close as possible metric parity with Managed NAT Gateway. While the
 project supports various metrics similar to the managed NAT Gateway via Cloudwatch agent, each provider is responsible
@@ -476,7 +584,7 @@ provided in the managed NAT Gateway:</p>
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="nt">&quot;namespace&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fck-nat&quot;</span><span class="p">,</span>
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="nt">&quot;metrics_collected&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">      </span><span class="nt">&quot;net&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">        </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;eth0&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;eth1&quot;</span><span class="p">],</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">        </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ens5&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ens6&quot;</span><span class="p">],</span>
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">        </span><span class="nt">&quot;measurement&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">          </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bytes_recv&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;rename&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BytesIn&quot;</span><span class="p">,</span><span class="w">  </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bytes&quot;</span><span class="w"> </span><span class="p">},</span>
 <a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">          </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bytes_sent&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;rename&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BytesOut&quot;</span><span class="p">,</span><span class="w">  </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bytes&quot;</span><span class="w"> </span><span class="p">},</span>
@@ -494,7 +602,7 @@ provided in the managed NAT Gateway:</p>
 <a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">        </span><span class="p">]</span>
 <a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">      </span><span class="p">},</span>
 <a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">      </span><span class="nt">&quot;ethtool&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">        </span><span class="nt">&quot;interface_include&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;eth0&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;eth1&quot;</span><span class="p">],</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">        </span><span class="nt">&quot;interface_include&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ens5&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;ens6&quot;</span><span class="p">],</span>
 <a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">        </span><span class="nt">&quot;metrics_include&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">          </span><span class="s2">&quot;bw_in_allowance_exceeded&quot;</span><span class="p">,</span>
 <a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="w">          </span><span class="s2">&quot;bw_out_allowance_exceeded&quot;</span><span class="p">,</span>
@@ -509,10 +617,11 @@ provided in the managed NAT Gateway:</p>
 <a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="w">      </span><span class="p">}</span>
 <a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="w">    </span><span class="p">},</span>
 <a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a><span class="w">    </span><span class="nt">&quot;append_dimensions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="w">      </span><span class="nt">&quot;InstanceId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$${aws:InstanceId}&quot;</span>
-<a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a><span class="w">  </span><span class="p">}</span>
-<a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a><span class="p">}</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="w">      </span><span class="nt">&quot;InstanceId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;${aws:InstanceId}&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="w">      </span><span class="nt">&quot;AutoScalingGroupNam&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;${aws:AutoScalingGroupName}&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a><span class="p">}</span>
 </code></pre></div>
 <p>Ensure you are aware of Cloudwatch metrics costs before enabling Cloudwatch agent. The above configuration would
 cost you about $17/monthly, excluding free tier.  </p>
@@ -563,7 +672,7 @@ cost you about $17/monthly, excluding free tier.  </p>
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["announce.dismiss"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.d7c377c4.min.js"></script>

@@ -83,6 +83,23 @@
     </div>
     <div data-md-component="announce">
       
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+              <button class="md-banner__button md-icon" aria-label="Don't show this again">
+                
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+              </button>
+            
+            
+  Hey! fck-nat is free and open source, but hosting the AMIs does incur some costs. <a href="https://ko-fi.com/codebrewed">Consider supporting me on Ko-fi ❤️</a>
+
+          </div>
+          
+            <script>var content,el=document.querySelector("[data-md-component=announce]");el&&(content=el.querySelector(".md-typeset"),__md_hash(content.innerHTML)===__md_get("__announce")&&(el.hidden=!0))</script>
+          
+        </aside>
+      
     </div>
     
       <div data-md-color-scheme="default" data-md-component="outdated" hidden>
@@ -279,6 +296,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../choosing_an_instance_size/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Choosing an Instance Size
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../deploying/" class="md-nav__link">
         
   
@@ -347,7 +384,16 @@
         <li class="md-nav__item">
   <a href="#configuration-file" class="md-nav__link">
     <span class="md-ellipsis">
-      Configuration file
+      Configuration File
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iam-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      IAM Requirements
     </span>
   </a>
   
@@ -373,6 +419,26 @@
   
   <span class="md-ellipsis">
     Features
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../limitations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Limitations
   </span>
   
 
@@ -410,7 +476,16 @@
         <li class="md-nav__item">
   <a href="#configuration-file" class="md-nav__link">
     <span class="md-ellipsis">
-      Configuration file
+      Configuration File
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iam-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      IAM Requirements
     </span>
   </a>
   
@@ -435,18 +510,67 @@
 
 
 <h1 id="fck-nat-configuration">fck-nat Configuration</h1>
-<h2 id="configuration-file">Configuration file</h2>
+<h2 id="configuration-file">Configuration File</h2>
 <p>Upon starting, fck-nat evaluates a configuration file describing how the instance should behave as well as what features
 shall be enabled. To configure fck-nat, ensure a file <code>/etc/fck-nat.conf</code> exists with your configuration. fck-nat
-requires the service to be restarted by running <code>service fck-nat-resart</code>. In most implementations this configuration is
+requires the service to be restarted by running <code>systemctl restart fck-nat.service</code>. In most implementations this configuration is
 passed only once via EC2's user data.</p>
-<p>The following describes available options:
-| name                    | description |
-| ----------------------- | ----------- |
-| <code>eni_id</code>                | The ID of the Elastic Network Interface to attach to the instance and use as a consistent endpoint to send traffic to fck nat. This is required when using high-availability mode. |
-| <code>eip_id</code>                | The ID of an Elastic IP to be attached to the public network interface. This ensures the NAT gateway public traffic is always routed through the same public IP address. |
-| <code>cwagent_enabled</code>       | If set, enables Cloudwatch agent and forward instance metrics to Cloudwatch. Requires <code>cwagent_cfg_param_name</code> to be set. |
-| <code>cwagent_cfg_param_name</code> | The name of the SSM Parameter holding the Cloudwatch agent configuration and which the agent shall pull from. Requires <code>cwagent_enabled</code> to be set. |</p>
+<p>The following describes available options:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>eni_id</code></td>
+<td>The ID of the Elastic Network Interface to attach to the instance and use as a consistent endpoint to send traffic to fck nat. This is required when using high-availability mode.</td>
+</tr>
+<tr>
+<td><code>eip_id</code></td>
+<td>The ID of an Elastic IP to be attached to the public network interface. This ensures the NAT gateway public traffic is always routed through the same public IP address.</td>
+</tr>
+<tr>
+<td><code>cwagent_enabled</code></td>
+<td>If set, enables Cloudwatch agent and forward instance metrics to Cloudwatch. Requires <code>cwagent_cfg_param_name</code> to be set.</td>
+</tr>
+<tr>
+<td><code>cwagent_cfg_param_name</code></td>
+<td>The name of the SSM Parameter holding the Cloudwatch agent configuration and which the agent shall pull from. Requires <code>cwagent_enabled</code> to be set.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="iam-requirements">IAM Requirements</h2>
+<p>Certain features of fck-nat require the role attached to the instance to have permissions for certain AWS API
+operations. The table below details the current permission requirements for various features:</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Required Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HA-mode (<code>eni_id</code>)</td>
+<td><code>ec2:AttachNetworkInterface, ec2:ModifyNetworkInterfaceAttribute</code></td>
+</tr>
+<tr>
+<td>Static IP (<code>eip_id</code>)</td>
+<td><code>ec2:AssociateAddress, ec2:DisassociateAddress</code></td>
+</tr>
+<tr>
+<td>Cloudwatch Agent (<code>cwagent_enabled</code>)</td>
+<td>Managed Policy: <code>CloudWatchAgentServerPolicy</code> <em>and</em> <code>ssm:GetParameter</code></td>
+</tr>
+<tr>
+<td>SSM Agent (installed by default, IAM role required to use)</td>
+<td>Managed Policy: <code>AmazonSSMManagedEC2InstanceDefaultPolicy</code></td>
+</tr>
+</tbody>
+</table>
 
 
 
@@ -493,7 +617,7 @@ passed only once via EC2's user data.</p>
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["announce.dismiss"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.d7c377c4.min.js"></script>
