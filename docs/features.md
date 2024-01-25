@@ -1,16 +1,32 @@
 # fck-nat Features
 
+!!! info "Heads up!"
+    The easiest way to get all of the features below is to use the official [CDK](deploying.md#cdk) or
+    [Terraform](deploying.md#terraform) modules!
+
 ## High-availability Mode
 
-fck-nat can operate on a single instance, or withing an autoscaling group for improved availability. When running in an
+fck-nat can operate on a single instance, or within an autoscaling group for improved availability. When running in an
 autoscaling group, fck-nat can be configured to always attach a specific ENI at start-up, allowing fck-nat to maintain
-a consistent internal-facing IP address. Additionally, it is also possible to configure an already allocated EIP address
-that would be carried through instance refreshs.
+a static internal-facing IP address. (For information on static external IPs, see: [Static IP](#static-ip))
 
-Those features are controlled by `eni_id` and `eip_id` directive in the configuration file.  
+This feature is controlled via the `eni_id` directive in the [configuration file](configuration.md#configuration-file)
+and also requires additional IAM permissions to function, see: [IAM Requirements](configuration.md#iam-requirements)
 
-**IAM requirements**: `ec2:AttachNetworkInterface`, `ec2:ModifyNetworkInterfaceAttribute` on `*` for ha-mode, plus
-`ec2:AssociateAddress`, `ec2:DisassociateAddress` on `*` when using a static EIP.
+## Static IP
+
+If you wish for your NAT instance to maintain a consistent external facing IP, fck-nat supports automatically
+association of an Elastic IP (EIP) addresss at launch.
+
+This feature is controlled via the `eip_id` directive in the [configuration file](configuration.md#configuration-file)
+and also requires additional IAM permissions to function, see: [IAM Requirements](configuration.md#iam-requirements)
+
+## SSM Agent
+
+The Amazon SSM Agent is installed in the fck-nat AMI by default to allow SSH-less access to instances as well as
+automated patching capabilities if you so choose (The fck-nat AMI also has kernel live patching modules enabled). To
+enable access via SSM, you just need to make sure that your fck-nat instance has the requisite
+[IAM permissions attached](configuration.md#iam-requirements)
 
 ## Metrics
 
@@ -33,7 +49,7 @@ provided in the managed NAT Gateway:
     "namespace": "fck-nat",
     "metrics_collected": {
       "net": {
-        "resources": ["eth0", "eth1"],
+        "resources": ["ens5", "ens6"],
         "measurement": [
           { "name": "bytes_recv", "rename": "BytesIn",  "unit": "Bytes" },
           { "name": "bytes_sent", "rename": "BytesOut",  "unit": "Bytes" },
@@ -51,7 +67,7 @@ provided in the managed NAT Gateway:
         ]
       },
       "ethtool": {
-        "interface_include": ["eth0", "eth1"],
+        "interface_include": ["ens5", "ens6"],
         "metrics_include": [
           "bw_in_allowance_exceeded",
           "bw_out_allowance_exceeded",
@@ -66,7 +82,8 @@ provided in the managed NAT Gateway:
       }
     },
     "append_dimensions": {
-      "InstanceId": "$${aws:InstanceId}"
+      "InstanceId": "${aws:InstanceId}",
+      "AutoScalingGroupNam": "${aws:AutoScalingGroupName}",
     }
   }
 }

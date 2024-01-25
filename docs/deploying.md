@@ -4,9 +4,6 @@ The most well-supported way to deploy fck-nat with all of its features available
 using another Infrastructure-as-code provider, you can still deploy a basic NAT instance with fck-nat, but it is more
 intensive to support some of fck-nat's additional features.
 
-Notably missing at the moment is a Terraform module. If you're using Terraform and would like to leverage fck-nat,
-please +1 this issue: [Create a fck-nat Terraform module](https://github.com/AndrewGuenther/fck-nat/issues/4)
-
 ## CDK
 
 fck-nat provides an official CDK module which supports all of fck-nat's features (namely high-availability mode)
@@ -111,6 +108,10 @@ resource "aws_instance" "fck-nat" {
 
 ## Cloudformation
 
+!!! note
+    If you'd be interested in seeing fck-nat published on the Cloudformation registry,
+    [give this issue a +1](https://github.com/AndrewGuenther/cdk-fck-nat/issues/295)
+
 For brevity, this document assumes you already have a VPC with public and private subnets defined in your
 Cloudformation template. This example template provisions the minimum resources required to connect fck-nat in your
 VPC. This is a good option for those that have an existing VPC and NAT Gateway and are looking to switch over. 
@@ -161,28 +162,30 @@ Resources:
       Roles:
         - Ref: NatRole
 
-  FckNatAsgLaunchConfig:
-    Type: AWS::AutoScaling::LaunchConfiguration
+  FckNatLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
     Properties:
-      ImageId: ami-05b6d5a2e26f13c93
-      InstanceType: t4g.nano
-      IamInstanceProfile:
-        Ref: FckNatAsgInstanceProfile
-      SecurityGroups:
-        - Fn::GetAtt:
-            - NatSecurityGroup
-            - GroupId
-      UserData:
-        Fn::Base64:
-          Fn::Join:
-            - ""
-            - - |-
-                #!/bin/bash
-                echo "eni_id=
-              - Ref: FckNatInterface
-              - |-
-                " >> /etc/fck-nat.conf
-                service fck-nat restart
+      LaunchTemplateName: FckNatLaunchTemplate
+      LaunchTemplateData:
+        ImageId: ami-05b6d5a2e26f13c93
+        InstanceType: t4g.nano
+        IamInstanceProfile:
+          Ref: FckNatAsgInstanceProfile
+        SecurityGroups:
+          - Fn::GetAtt:
+              - NatSecurityGroup
+              - GroupId
+        UserData:
+          Fn::Base64:
+            Fn::Join:
+              - ""
+              - - |-
+                  #!/bin/bash
+                  echo "eni_id=
+                - Ref: FckNatInterface
+                - |-
+                  " >> /etc/fck-nat.conf
+                  service fck-nat restart
     DependsOn:
       - NatRole
 
@@ -192,8 +195,8 @@ Resources:
       MaxSize: "1"
       MinSize: "1"
       DesiredCapacity: "1"
-      LaunchConfigurationName:
-        Ref: FckNatAsgLaunchConfig
+      LaunchTemplateId:
+        Ref: FckNatLaunchTemplate
       VPCZoneIdentifier:
         - !Sub "${subnet}"
     UpdatePolicy:
