@@ -128,7 +128,7 @@ This snippet assumes the following resources are already defined:
 
 Steps to deploy:
 
-1. Paste your VPC ID, public subnet ID, VPC CIDR block into the parameters. Change the [FckNatAMIParameter](index.md#getting-a-fck-nat-ami) based on the region fck-nat is deployed to.
+1. Paste your VPC ID, public subnet ID, VPC CIDR block into the parameters. Set the [FckNatAMIParameter](index.md#getting-a-fck-nat-ami) based on the region fck-nat is deployed to.
 2. Ensure that your public subnet has `Enable auto-assign public IPv4 address` turned on. This can be found in the Console at `VPC > Subnets > Edit subnet settings > Auto-assign IP settings`.
 3. Deploy with CloudFormation `aws cloudformation deploy --force-upload --capabilities CAPABILITY_IAM --template-file template.yml --stack-name FckNat`
 4. Add the default route to your route table on the subnet. It is best to do this manually so you can do a seamless cut over from your existing NAT gateway. Go to `VPC > Route Tables > Private route table > Routes > Edit Routes` Add a 0.0.0.0/0 route pointing to the network interface.
@@ -144,7 +144,6 @@ Parameters:
     Default: "10.0.0.0/16"
   FckNatAMIParameter:
     Type: AWS::EC2::Image::Id
-    Default: ami-075a0093cd9926d44
 
 Resources:
   FckNatInterface:
@@ -182,6 +181,7 @@ Resources:
     Properties:
       MaxSize: "1"
       MinSize: "1"
+      DesiredCapacity: "1"
       LaunchTemplate:
         LaunchTemplateId: !Ref FckNatLaunchTemplate
         Version: !GetAtt FckNatLaunchTemplate.LatestVersionNumber
