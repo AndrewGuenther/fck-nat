@@ -83,7 +83,7 @@ provided in the managed NAT Gateway:
     },
     "append_dimensions": {
       "InstanceId": "${aws:InstanceId}",
-      "AutoScalingGroupNam": "${aws:AutoScalingGroupName}",
+      "AutoScalingGroupName": "${aws:AutoScalingGroupName}"
     }
   }
 }
