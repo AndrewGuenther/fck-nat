@@ -8,7 +8,7 @@ Welcome to fck-nat. The (f)easible (c)ost (k)onfigurable NAT!
 
 Full documentation is available at https://fck-nat.dev
 
-fck-nat offers a ready-to-use ARM and x86 based AMIs built on Amazon Linux 2 which can support up to 5Gbps burst NAT
+fck-nat offers a ready-to-use ARM and x86 based AMIs built on Amazon Linux 2023 which can support up to 5Gbps burst NAT
 traffic on a t4g.nano instance. How does that compare to a Managed NAT Gateway?
 
 Hourly rates:

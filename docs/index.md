@@ -6,7 +6,7 @@ Welcome to fck-nat. The (f)easible (c)ost (k)onfigurable NAT!
 * Want to use NAT instances and stay up-to-date with the latest security patches? fck-nat.
 * Want to reuse your Bastion hosts as a NAT? fck-nat.
 
-fck-nat offers a ready-to-use ARM and x86 based AMIs built on Amazon Linux 2 which can support up to 5Gbps burst NAT
+fck-nat offers a ready-to-use ARM and x86 based AMIs built on Amazon Linux 2023 which can support up to 5Gbps burst NAT
 traffic on a t4g.nano instance. How does that compare to a Managed NAT Gateway?
 
 Hourly rates:
@@ -50,18 +50,19 @@ swappable" philosophy.
 
 ### Getting a fck-nat AMI
 
-fck-nat provides public AMIs in both arm64 and x86_64 flavors built on top of Amazon Linux 2. If you would rather use a
+fck-nat provides public AMIs in both arm64 and x86_64 flavors built on top of Amazon Linux 2023. If you would rather use a
 different base image or host the AMI yourself, you can build your own AMI.
 
 #### The public fck-nat AMIs
 
 fck-nat currently provides public AMIs in most regions. You can see the full list in
-`packer/fck-nat-public-all-regions.pkrvars.hcl`. While arm64 images are the most cost effective, x86_64 images are also
+[`packer/fck-nat-public-all-regions.pkrvars.hcl`](https://github.com/AndrewGuenther/fck-nat/blob/main/packer/fck-nat-public-all-regions.pkrvars.hcl).
+While arm64 images are the most cost effective, x86_64 images are also
 available. You can get view the available fck-nat AMIs with the following query:
 
 ```
-# Amazon Linux 2 based AMIs
-aws ec2 describe-images --owners 568608671756 --filters 'Name=name,Values=fck-nat-amzn2-*'
+# Amazon Linux 2023 based AMIs
+aws ec2 describe-images --owners 568608671756 --filters 'Name=name,Values=fck-nat-al2023-*'
 ```
 
 #### Building your own fck-nat AMI
@@ -89,5 +90,5 @@ configured in order to route traffic to your NAT. Namely, you must:
 1. Disable source/destination checks
 1. Update your VPC route table
 
-Some tools can accomplish this for you, others cannot. Check the ["Deploying"](deploying.md) section for more
+Some tools can accomplish this for you, others cannot. Check the [Deployment page](deploying.md) for more
 information about deploying fck-nat with your favorite infrastructure-as-code tool.

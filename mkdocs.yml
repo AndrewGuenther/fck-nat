@@ -1,7 +1,14 @@
 site_name: fck-nat
+site_url: 'https://fck-nat.dev/'
+site_author: Andrew Guenther
+repo_url: https://github.com/AndrewGuenther/fck-nat
+repo_name: AndrewGuenther/fck-nat
+edit_uri: edit/main/docs/
+site_dir: docs_build
 
 theme:
   name: material
+  custom_dir: overrides
   palette:
     # Palette toggle for light mode
     - scheme: default
@@ -13,21 +20,28 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+  features:
+    - announce.dismiss
 
+extra:
+  version:
+    provider: mike
+    default: stable
 
 nav:
   - Introduction: index.md
+  - Choosing an Instance Size: choosing_an_instance_size.md
   - Deploying: deploying.md
   - Configuration: configuration.md
   - Features: features.md
-
-repo_url: https://github.com/AndrewGuenther/fck-nat
-repo_name: AndrewGuenther/fck-nat
-edit_uri: edit/main/docs/
+  - Limitations: limitations.md
 
 markdown_extensions:
+  - tables
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - admonition
+  - pymdownx.details

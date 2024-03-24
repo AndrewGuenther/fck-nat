@@ -4,9 +4,6 @@ The most well-supported way to deploy fck-nat with all of its features available
 using another Infrastructure-as-code provider, you can still deploy a basic NAT instance with fck-nat, but it is more
 intensive to support some of fck-nat's additional features.
 
-Notably missing at the moment is a Terraform module. If you're using Terraform and would like to leverage fck-nat,
-please +1 this issue: [Create a fck-nat Terraform module](https://github.com/AndrewGuenther/fck-nat/issues/4)
-
 ## CDK
 
 fck-nat provides an official CDK module which supports all of fck-nat's features (namely high-availability mode)
@@ -34,7 +31,7 @@ You can also deploy fck-nat in non-HA mode using CDK's built-in `NatInstanceProv
 const natGatewayProvider = new NatInstanceProvider({
     instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO),
     machineImage: new LookupMachineImage({
-        name: 'fck-nat-amzn2-*-arm64-ebs',
+        name: 'fck-nat-al2023-*-arm64-ebs',
         owners: ['568608671756'],
     })
 })
@@ -46,10 +43,77 @@ natGatewayProvider.securityGroup.addIngressRule(Peer.ipv4(vpc.vpcCidrBlock), Por
 
 [Read more about the `NatInstanceProvider` construct](https://docs.aws.amazon.com/cdk/api/latest/docs/@aws-cdk_aws-ec2.NatInstanceProvider.html)
 
-## Cloudformation
+## Terraform
+
+Doriann Corlouër ([RaJiska](https://github.com/RaJiska/)) maintains the official fck-nat Terraform module over at
+[terraform-aws-fck-nat](https://github.com/RaJiska/terraform-aws-fck-nat). Below is a sample of how to use that module
+and full documentation can be found on the
+[Terraform Registry](https://registry.terraform.io/modules/RaJiska/fck-nat/aws/latest)
+
+```hcl
+module "fck-nat" {
+  source = "RaJiska/fck-nat/aws"
+
+  name                 = "my-fck-nat"
+  vpc_id               = "vpc-abc1234"
+  subnet_id            = "subnet-abc1234"
+  # ha_mode              = true                 # Enables high-availability mode
+  # eip_allocation_ids   = ["eipalloc-abc1234"] # Allocation ID of an existing EIP
+  # use_cloudwatch_agent = true                 # Enables Cloudwatch agent and have metrics reported
+
+  update_route_tables = true
+  route_tables_ids = {
+    "your-rtb-name-A" = "rtb-abc1234Foo"
+    "your-rtb-name-B" = "rtb-abc1234Bar"
+  }
+}
+```
+
+It is also possible to configure fck-nat with out-of-the-box Terraform modules, but you may not be able to leverage all
+of fck-nat's features.
+
+```hcl
+data "aws_ami" "fck_nat" {
+  filter {
+    name   = "name"
+    values = ["fck-nat-al2023-*"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["arm64"]
+  }
+
+  owners      = ["568608671756"]
+  most_recent = true
+}
+
+resource "aws_network_interface" "fck-nat-if" {
+  subnet_id       = aws_subnet.subnet_public.id
+  security_groups = [aws_default_security_group.default_security_group.id]
+
+  source_dest_check = false
+}
+
+resource "aws_instance" "fck-nat" {                                                   
+  ami           = data.aws_ami.fck_nat.id
+  instance_type = "t4g.nano"
+
+  network_interface {
+    network_interface_id = aws_network_interface.fck-nat-if.id
+    device_index         = 0
+  }                                                                              
+}
+```
+
+## CloudFormation
+
+!!! note
+    If you'd be interested in seeing fck-nat published on the CloudFormation registry,
+    [give this issue a +1](https://github.com/AndrewGuenther/cdk-fck-nat/issues/295)
 
 For brevity, this document assumes you already have a VPC with public and private subnets defined in your
-Cloudformation template. This example template provisions the minimum resources required to connect fck-nat in your
+CloudFormation template. This example template provisions the minimum resources required to connect fck-nat in your
 VPC. This is a good option for those that have an existing VPC and NAT Gateway and are looking to switch over. 
 
 1. A security group allowing ingress traffic from within the VPC and egress out to the internet
@@ -64,93 +128,85 @@ This snippet assumes the following resources are already defined:
 
 Steps to deploy:
 
-1. Paste your VPC ID, public subnet ID, and CIDR block into the parameters.
+1. Paste your VPC ID, public subnet ID, VPC CIDR block into the parameters. Set the [FckNatAMIParameter](index.md#getting-a-fck-nat-ami) based on the region fck-nat is deployed to.
 2. Ensure that your public subnet has `Enable auto-assign public IPv4 address` turned on. This can be found in the Console at `VPC > Subnets > Edit subnet settings > Auto-assign IP settings`.
-3. Deploy with cloudformation `aws cloudformation deploy --force-upload --template-file template.yml --stack-name FckNat`
-4. Add the default route to your route table on the subnet. It is best to do this manually so you can do a seamless cut over from your existing nat gateway. Go to `VPC > Route Tables > Private route table > Routes > Edit Routes` Add a 0.0.0.0/0 route pointing to the network interface.
+3. Deploy with CloudFormation `aws cloudformation deploy --force-upload --capabilities CAPABILITY_IAM --template-file template.yml --stack-name FckNat`
+4. Add the default route to your route table on the subnet. It is best to do this manually so you can do a seamless cut over from your existing NAT gateway. Go to `VPC > Route Tables > Private route table > Routes > Edit Routes` Add a 0.0.0.0/0 route pointing to the network interface.
 
 ``` yaml
 Parameters:
-  vpc:
-    Type: String
-    Default: "vpc-121212121212121212"
-  subnet:
-    Type: String
-    Default: "subnet-121212121212121212"
-  CIDR:
+  VpcIdParameter:
+    Type: AWS::EC2::VPC::Id
+  SubnetIdParameter:
+    Type: AWS::EC2::Subnet::Id
+  CIDRParameter:
     Type: String
     Default: "10.0.0.0/16"
+  FckNatAMIParameter:
+    Type: AWS::EC2::Image::Id
 
 Resources:
   FckNatInterface:
     Type: AWS::EC2::NetworkInterface
     Properties:
-      SubnetId: !Sub "${subnet}"
+      Description: FckNat Gateway Interface
+      SubnetId: !Ref SubnetIdParameter
       GroupSet:
-        - Fn::GetAtt:
-            - NatSecurityGroup
-            - GroupId
+        - !GetAtt [FckNatSecurityGroup, GroupId]
       SourceDestCheck: false
-      
   FckNatAsgInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Roles:
-        - Ref: NatRole
-
-  FckNatAsgLaunchConfig:
-    Type: AWS::AutoScaling::LaunchConfiguration
+        - !Ref FckNatRole
+  FckNatLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    DependsOn: FckNatRole
     Properties:
-      ImageId: ami-05b6d5a2e26f13c93
-      InstanceType: t4g.nano
-      IamInstanceProfile:
-        Ref: FckNatAsgInstanceProfile
-      SecurityGroups:
-        - Fn::GetAtt:
-            - NatSecurityGroup
-            - GroupId
-      UserData:
-        Fn::Base64:
-          Fn::Join:
-            - ""
-            - - |-
-                #!/bin/bash
-                echo "eni_id=
-              - Ref: FckNatInterface
-              - |-
-                " >> /etc/fck-nat.conf
-                service fck-nat restart
-    DependsOn:
-      - NatRole
-
+      LaunchTemplateName: FckNatLaunchTemplate
+      LaunchTemplateData:
+        ImageId: !Ref FckNatAMIParameter
+        InstanceType: t4g.nano
+        IamInstanceProfile:
+          Name: !Ref FckNatAsgInstanceProfile
+        SecurityGroupIds:
+          - !GetAtt [FckNatSecurityGroup, GroupId]
+        UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash
+            echo "eni_id=${FckNatInterface}" >> /etc/fck-nat.conf
+            service fck-nat restart
   FckNatAsg:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       MaxSize: "1"
       MinSize: "1"
       DesiredCapacity: "1"
-      LaunchConfigurationName:
-        Ref: FckNatAsgLaunchConfig
+      LaunchTemplate:
+        LaunchTemplateId: !Ref FckNatLaunchTemplate
+        Version: !GetAtt FckNatLaunchTemplate.LatestVersionNumber
       VPCZoneIdentifier:
-        - !Sub "${subnet}"
+        - !Ref SubnetIdParameter
+      Tags:
+        - Key: Name
+          Value: fck-nat
+          PropagateAtLaunch: true
     UpdatePolicy:
       AutoScalingScheduledAction:
         IgnoreUnmodifiedGroupSizeProperties: true
-
-  NatSecurityGroup:
+  FckNatSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Security Group for NAT
-      SecurityGroupIngress: 
-        - CidrIp: !Sub "${CIDR}"
+      GroupDescription: Security Group for FckNat
+      SecurityGroupIngress:
+        - CidrIp: !Ref CIDRParameter
           IpProtocol: "-1"
       SecurityGroupEgress:
         - CidrIp: 0.0.0.0/0
           Description: Allow all outbound traffic by default
           IpProtocol: "-1"
-      VpcId: !Sub "${vpc}" 
-
-  NatRole:
+      VpcId: !Ref VpcIdParameter
+  FckNatRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -161,7 +217,8 @@ Resources:
               Service: ec2.amazonaws.com
         Version: "2012-10-17"
       Policies:
-        - PolicyDocument:
+        - PolicyName: AttachNatEniPolicy
+          PolicyDocument:
             Statement:
               - Action:
                   - ec2:AttachNetworkInterface
@@ -169,8 +226,8 @@ Resources:
                 Effect: Allow
                 Resource: "*"
             Version: "2012-10-17"
-          PolicyName: attachNatEniPolicy
-        - PolicyDocument:
+        - PolicyName: AssociateNatAddressPolicy
+          PolicyDocument:
             Statement:
               - Action:
                   - ec2:AssociateAddress
@@ -178,7 +235,6 @@ Resources:
                 Effect: Allow
                 Resource: "*"
             Version: "2012-10-17"
-          PolicyName: attachNatEniPolicy
 ```
 
 ## Manual - Web Console

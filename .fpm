@@ -6,7 +6,7 @@
 --url "https://github.com/AndrewGuenther/fck-nat"
 --maintainer "Andrew Guenther <guenther.andrew.j@gmail.com>"
 --after-install service/post-install.sh
---depends aws-cli,ec2-net-utils
+--depends aws-cli
 
 service/fck-nat.sh=/opt/fck-nat/fck-nat.sh
 service/fck-nat.service=/etc/systemd/system/fck-nat.service

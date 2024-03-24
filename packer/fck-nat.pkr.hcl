@@ -1,7 +1,7 @@
 packer {
   required_plugins {
     amazon = {
-      version = ">= 0.0.2"
+      version = ">= 1.0.8"
       source  = "github.com/hashicorp/amazon"
     }
   }
@@ -36,7 +36,7 @@ variable "architecture" {
 }
 
 variable "flavor" {
-  default = "amzn2"
+  default = "al2023"
 }
 
 variable "instance_type" {
@@ -51,7 +51,7 @@ variable "region" {
 }
 
 variable "base_image_name" {
-  default = "*amzn2-ami-minimal-*"
+  default = "*al2023-ami-minimal-*-kernel-*"
 }
 
 variable "base_image_owner" {
@@ -71,6 +71,7 @@ source "amazon-ebs" "fck-nat" {
   instance_type           = "${lookup(var.instance_type, var.architecture, "error")}"
   region                  = var.region
   ssh_username            = var.ssh_username
+  temporary_key_pair_type = "ed25519"
   source_ami_filter {
     filters = {
       virtualization-type = var.virtualization_type
@@ -96,6 +97,7 @@ build {
 
   provisioner "shell" {
     inline = [
+      "sudo yum install amazon-cloudwatch-agent amazon-ssm-agent iptables -y",
       "sudo yum --nogpgcheck -y localinstall /tmp/fck-nat-${var.version}-any.rpm",
       "sudo yum install amazon-cloudwatch-agent -y",
       "sudo yum install amazon-ssm-agent -y",
@@ -103,5 +105,14 @@ build {
       "sudo systemctl mask sshd"
     ]
   }
-}
 
+  provisioner "shell" {
+    inline = [
+      "sudo dnf install -y kpatch-dnf",
+      "sudo dnf kernel-livepatch -y auto",
+      "sudo dnf install -y kpatch-runtime",
+      "sudo dnf update kpatch-runtime",
+      "sudo systemctl enable kpatch.service && sudo systemctl start kpatch.service",
+    ]
+  }
+}
