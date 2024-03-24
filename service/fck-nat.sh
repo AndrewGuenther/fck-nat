@@ -12,7 +12,8 @@ instance_id="$(curl -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254
 aws_region="$(curl -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/meta-data/placement/region)"
 outbound_mac="$(curl -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/meta-data/mac)"
 outbound_eni_id="$(curl -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/meta-data/network/interfaces/macs/$outbound_mac/interface-id)"
-nat_interface=$(ip link show dev "$outbound_eni_id" | head -n 1 | awk '{print $2}' | sed s/://g )
+nat_public_interface=$(ip link show dev "$outbound_eni_id" | head -n 1 | awk '{print $2}' | sed s/://g )
+nat_private_interface=$nat_public_interface
 
 if test -n "$eip_id"; then
     echo "Found eip_id configuration, associating $eip_id..."
@@ -50,26 +51,40 @@ if test -n "$eni_id"; then
     else
         echo "$eni_id already attached, skipping ENI attachment"
     fi
+
+    nat_private_interface=$(ip link show dev "$eni_id" | head -n 1 | awk '{print $2}' | sed s/://g )
+
 elif test -n "$interface"; then
     echo "Found interface configuration, using $interface"
-    nat_interface=$interface
+    nat_public_interface=$interface
+    nat_private_interface=$nat_public_interface
 else
-    echo "No eni_id or interface configuration found, using default interface $nat_interface"
+    echo "No eni_id or interface configuration found, using default interface $nat_public_interface"
 fi
 
-echo "Enabling ip_forward..."
+echo "Setting up NAT64..."
+modprobe jool
+/usr/local/bin/jool instance flush
+/usr/local/bin/jool instance add --netfilter --pool6 64:ff9b::/96
+
+echo "Enabling IPv4 forwarding..."
 sysctl -q -w net.ipv4.ip_forward=1
 
-echo "Disabling reverse path protection..."
+echo "Disabling IPv4 reverse path protection..."
 for i in $(find /proc/sys/net/ipv4/conf/ -name rp_filter) ; do
   echo 0 > $i;
 done
 
-echo "Flushing NAT table..."
+echo "Flushing IPv4 NAT table..."
 iptables -t nat -F
 
-echo "Adding NAT rule..."
-iptables -t nat -A POSTROUTING -o "$nat_interface" -j MASQUERADE -m comment --comment "NAT routing rule installed by fck-nat"
+echo "Adding IPv4 NAT rules..."
+iptables -t nat -A POSTROUTING -o "$nat_public_interface" -j MASQUERADE -m comment --comment "NAT routing rule installed by fck-nat"
+
+echo "Enabling IPv6 forwarding..."
+sysctl -q -w net.ipv6.conf."$nat_public_interface".accept_ra=2
+sysctl -q -w net.ipv6.conf."$nat_private_interface".accept_ra=2
+sysctl -q -w net.ipv6.conf.all.forwarding=1
 
 if test -n "$cwagent_enabled" && test -n "$cwagent_cfg_param_name"; then
     echo "Found cwagent_enabled and cwagent_cfg_param_name configuration, starting CloudWatch agent..."
