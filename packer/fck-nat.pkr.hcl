@@ -125,10 +125,19 @@ build {
   # Install fck-nat
   provisioner "shell" {
     inline = [
-      "sudo yum install amazon-cloudwatch-agent iptables -y",
+      "sudo yum install amazon-cloudwatch-agent amazon-ssm-agent iptables -y",
       "sudo yum --nogpgcheck -y localinstall /tmp/fck-nat-${var.version}-any.rpm",
       "sudo rm -f /tmp/fck-nat-${var.version}-any.rpm",
     ]
   }
-}
 
+  provisioner "shell" {
+    inline = [
+      "sudo dnf install -y kpatch-dnf",
+      "sudo dnf kernel-livepatch -y auto",
+      "sudo dnf install -y kpatch-runtime",
+      "sudo dnf update kpatch-runtime",
+      "sudo systemctl enable kpatch.service && sudo systemctl start kpatch.service",
+    ]
+  }
+}
