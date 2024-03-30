@@ -99,6 +99,8 @@ build {
     inline = [
       "sudo yum install amazon-cloudwatch-agent amazon-ssm-agent iptables -y",
       "sudo yum --nogpgcheck -y localinstall /tmp/fck-nat-${var.version}-any.rpm",
+      "sudo systemctl disable sshd",
+      "sudo systemctl mask sshd"
     ]
   }
 
