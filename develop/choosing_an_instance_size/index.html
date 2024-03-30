@@ -630,35 +630,70 @@ Once you start getting to this level though, the scaling function actually becom
 offers dedicated networking at known increments: 12Gbps (like the <code>c6g.8xlarge</code> up there), 25Gbps, 50Gbps, and 100Gbps.
 Remember, at &gt;=32vCPUs you're only getting 50% egress bandwidth so the effective values are really 6Gbps, 12.5Gbps,
 25Gbps, and 50Gbps</p>
-<p>Here's the instance types offering the best value at each of those additional levels:</p>
+<p>Here's the instance types offering the best value at each bandwidth level:</p>
 <table>
 <thead>
 <tr>
 <th>Bandwidth</th>
 <th>Instance type</th>
 <th>Price per Month</th>
+<th>Price per Month per Gbps</th>
 </tr>
 </thead>
 <tbody>
 <tr>
+<td>32Mbps</td>
+<td>t4g.nano</td>
+<td>$    3.06</td>
+<td>$   95.63</td>
+</tr>
+<tr>
+<td>64Mbps</td>
+<td>t3.micro</td>
+<td>$    7.59</td>
+<td>$  118.59</td>
+</tr>
+<tr>
+<td>1.6Gbps</td>
+<td>c6gn.medium</td>
+<td>$   32.81</td>
+<td>$   20.51</td>
+</tr>
+<tr>
+<td>3.125Gbps</td>
+<td>c7gn.medium</td>
+<td>$   48.25</td>
+<td>$   15.44</td>
+</tr>
+<tr>
+<td>5Gbps</td>
+<td>c7gn.large</td>
+<td>$  132.20</td>
+<td>$   26.44</td>
+</tr>
+<tr>
 <td>6Gbps</td>
 <td>c6g.8xlarge</td>
-<td>$794.42</td>
+<td>$  794.42</td>
+<td>$ 132.40</td>
 </tr>
 <tr>
 <td>12.5Gbps</td>
 <td>m5n.8xlarge</td>
-<td>$1510.37</td>
+<td>$ 1510.37</td>
+<td>$ 120.83</td>
 </tr>
 <tr>
 <td>25Gbps</td>
 <td>r6in.8xlarge</td>
-<td>$1074.56</td>
+<td>$ 1074.56</td>
+<td>$   42.98</td>
 </tr>
 <tr>
 <td>50Gbps</td>
 <td>c7gn.8xlarge</td>
-<td>$1457.66</td>
+<td>$ 1457.66</td>
+<td>$   29.15</td>
 </tr>
 </tbody>
 </table>
@@ -671,6 +706,8 @@ bandwidth.</p>
 analysis on instance types. The scripts below will pull network bandwidth information from the EC2 API and pricing
 information from the pricing API then combine them along with a <code>max_egress</code> value that takes into account the
 rules above and a <code>ratio</code> value which is effectively Gbps per dollar and is used as a measurement of "value"</p>
+<p>You can find the scripts below as well as the most recent output to run your own analysis on in the 
+<a href="https://github.com/AndrewGuenther/fck-nat/tree/main/docs/pricing_analysis"><code>docs/pricing_analysis</code></a> folder</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>aws<span class="w"> </span>ec2<span class="w"> </span>describe-instance-types<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span>--output<span class="w"> </span>json<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.InstanceTypes[] | { (.InstanceType): { vcpus: .VCpuInfo.DefaultVCpus, baseline: .NetworkInfo.NetworkCards[0].BaselineBandwidthInGbps, burst: .NetworkInfo.NetworkPerformance}}&#39;</span><span class="w"> </span><span class="se">\</span>
@@ -682,12 +719,13 @@ rules above and a <code>ratio</code> value which is effectively Gbps per dollar 
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span>--filters<span class="w"> </span><span class="s2">&quot;Type=TERM_MATCH,Field=location,Value=US East (N. Virginia)&quot;</span><span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span>--region<span class="w"> </span>us-east-1<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-rc<span class="w"> </span><span class="s1">&#39;.PriceList[]&#39;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;{ (.product.attributes.instanceType): { price: (.terms.OnDemand[].priceDimensions[].pricePerUnit.USD | tonumber) }}&#39;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-s<span class="w"> </span>add<span class="w"> </span>&gt;<span class="w"> </span>instance-pricing.json
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>jq<span class="w"> </span>-s<span class="w"> </span><span class="s1">&#39;.[0] * .[1]&#39;</span><span class="w"> </span>instance-pricing.json<span class="w"> </span>instance-networking.json<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;with_entries(select(.value | has(&quot;baseline&quot;) and has(&quot;price&quot;) and .price &gt; 0.0))&#39;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;to_entries | map(.value |= . + {max_egress: (if .vcpus &lt; 32 then ([.baseline, 5.0] | min) else .baseline / 2 end) }) | map(.value |= . + {ratio: (.max_egress / (.price | tonumber)), price_monthly: (.price * 730)}) | sort_by(.value.ratio) | from_entries&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>instance-merged.json
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-rc<span class="w"> </span><span class="s1">&#39;select(.product.productFamily==&quot;Compute Instance&quot;)&#39;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;{ (.product.attributes.instanceType): { price: (.terms.OnDemand[].priceDimensions[].pricePerUnit.USD | tonumber) }}&#39;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-s<span class="w"> </span>add<span class="w"> </span>&gt;<span class="w"> </span>instance-pricing.json
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>jq<span class="w"> </span>-s<span class="w"> </span><span class="s1">&#39;.[0] * .[1]&#39;</span><span class="w"> </span>instance-pricing.json<span class="w"> </span>instance-networking.json<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;with_entries(select(.value | has(&quot;baseline&quot;) and has(&quot;price&quot;) and .price &gt; 0.0))&#39;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;to_entries | map(.value |= . + {max_egress: (if .vcpus &lt; 32 then ([.baseline, 5.0] | min) else .baseline / 2 end) }) | map(.value |= . + {ratio: (.max_egress / (.price | tonumber)), price_monthly: (.price * 730)}) | sort_by(.value.ratio) | from_entries&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>instance-merged.json
 </code></pre></div>
 </details>
 
