@@ -62,14 +62,19 @@ offers dedicated networking at known increments: 12Gbps (like the `c6g.8xlarge` 
 Remember, at >=32vCPUs you're only getting 50% egress bandwidth so the effective values are really 6Gbps, 12.5Gbps,
 25Gbps, and 50Gbps
 
-Here's the instance types offering the best value at each of those additional levels:
+Here's the instance types offering the best value at each bandwidth level:
 
-| Bandwidth | Instance type | Price per Month |
-| --------- | ------------- | --------------- |
-| 6Gbps     | c6g.8xlarge   | $794.42         |
-| 12.5Gbps  | m5n.8xlarge   | $1510.37        |
-| 25Gbps    | r6in.8xlarge  | $1074.56        |
-| 50Gbps    | c7gn.8xlarge  | $1457.66        |
+| Bandwidth | Instance type | Price per Month | Price per Month per Gbps |
+| --------- | ------------- | --------------- | ------------------------ |
+| 32Mbps    | t4g.nano      | $    3.06       | $   95.63                |
+| 64Mbps    | t3.micro      | $    7.59       | $  118.59                |
+| 1.6Gbps   | c6gn.medium   | $   32.81       | $   20.51                |
+| 3.125Gbps | c7gn.medium   | $   48.25       | $   15.44                |
+| 5Gbps     | c7gn.large    | $  132.20       | $   26.44                |
+| 6Gbps     | c6g.8xlarge   | $  794.42       | $ 132.40                 |
+| 12.5Gbps  | m5n.8xlarge   | $ 1510.37       | $ 120.83                 |
+| 25Gbps    | r6in.8xlarge  | $ 1074.56       | $   42.98                |
+| 50Gbps    | c7gn.8xlarge  | $ 1457.66       | $   29.15                |
 
 As you can see, 6Gbps and 12.5Gbps are simply not economical options when compared to the best 5Gbps and 25Gbps
 options. So you're effectively looking at jumping straight from 5Gbps to 25Gbps if you need higher sustained
@@ -80,6 +85,9 @@ bandwidth.
     analysis on instance types. The scripts below will pull network bandwidth information from the EC2 API and pricing
     information from the pricing API then combine them along with a `max_egress` value that takes into account the
     rules above and a `ratio` value which is effectively Gbps per dollar and is used as a measurement of "value"
+
+    You can find the scripts below as well as the most recent output to run your own analysis on in the 
+    [`docs/pricing_analysis`](https://github.com/AndrewGuenther/fck-nat/tree/main/docs/pricing_analysis) folder
 
     ```shell
     aws ec2 describe-instance-types \
@@ -93,6 +101,7 @@ bandwidth.
         --filters "Type=TERM_MATCH,Field=location,Value=US East (N. Virginia)" \
         --region us-east-1 \
     | jq -rc '.PriceList[]' \
+    | jq -rc 'select(.product.productFamily=="Compute Instance")' \
     | jq -r '{ (.product.attributes.instanceType): { price: (.terms.OnDemand[].priceDimensions[].pricePerUnit.USD | tonumber) }}' \
     | jq -s add > instance-pricing.json
 
