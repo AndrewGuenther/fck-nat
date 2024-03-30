@@ -86,6 +86,9 @@ bandwidth.
     information from the pricing API then combine them along with a `max_egress` value that takes into account the
     rules above and a `ratio` value which is effectively Gbps per dollar and is used as a measurement of "value"
 
+    You can find the scripts below as well as the most recent output to run your own analysis on in the 
+    [`docs/pricing_analysis`](https://github.com/AndrewGuenther/fck-nat/tree/main/docs/pricing_analysis) folder
+
     ```shell
     aws ec2 describe-instance-types \
         --output json \
