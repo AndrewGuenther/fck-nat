@@ -12,7 +12,7 @@ documentation on [Construct Hub](https://constructs.dev/packages/cdk-fck-nat/v/1
 CDK construct in Typescript:
 
 ``` ts
-const natGatewayProvier = new FckNatInstanceProvider({
+const natGatewayProvider = new FckNatInstanceProvider({
     instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO),
 });
 const vpc = new Vpc(this, 'vpc', {
