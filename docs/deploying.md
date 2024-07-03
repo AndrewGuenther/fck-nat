@@ -174,16 +174,10 @@ Resources:
         IamInstanceProfile:
           Name: !Ref FckNatAsgInstanceProfile
         UserData:
-          Fn::Base64:
-            Fn::Join:
-              - ""
-              - - |-
-                  #!/bin/bash
-                  echo "eni_id=
-                - !Ref FckNatInterface
-                - |-
-                  " >> /etc/fck-nat.conf
-                  service fck-nat restart
+          Fn::Base64: !Sub |
+            #!/bin/bash
+            echo "eni_id=${FckNatInterface}" >> /etc/fck-nat.conf
+            service fck-nat restart
   FckNatAsg:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
