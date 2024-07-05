@@ -111,4 +111,10 @@ build {
       "sudo systemctl enable kpatch.service && sudo systemctl start kpatch.service",
     ]
   }
+
+  provisioner "shell" {
+    inline = [
+      "rm -f ~/.ssh/authorized_keys"
+    ]
+  }
 }
