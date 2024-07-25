@@ -67,15 +67,16 @@ variable "jool_version" {
 }
 
 source "amazon-ebs" "fck-nat" {
-  ami_name                = "fck-nat-${var.flavor}-${var.virtualization_type}-${var.version}-${formatdate("YYYYMMDD", timestamp())}-${var.architecture}-ebs"
-  ami_virtualization_type = var.virtualization_type
-  ami_regions             = var.ami_regions
-  ami_users               = var.ami_users
-  ami_groups              = var.ami_groups
-  instance_type           = "${lookup(var.instance_type, var.architecture, "error")}"
-  region                  = var.region
-  ssh_username            = var.ssh_username
-  temporary_key_pair_type = "ed25519"
+  ami_name                  = "fck-nat-${var.ami_prefix}${var.flavor}-${var.virtualization_type}-${var.version}-${formatdate("YYYYMMDD", timestamp())}-${var.architecture}-ebs"
+  ami_virtualization_type   = var.virtualization_type
+  ami_regions               = var.ami_regions
+  ami_users                 = var.ami_users
+  ami_groups                = var.ami_groups
+  instance_type             = "${lookup(var.instance_type, var.architecture, "error")}"
+  region                    = var.region
+  ssh_username              = var.ssh_username
+  ssh_clear_authorized_keys = true
+  temporary_key_pair_type   = "ed25519"
   source_ami_filter {
     filters = {
       virtualization-type = var.virtualization_type
