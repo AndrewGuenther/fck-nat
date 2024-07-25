@@ -13,7 +13,7 @@ CDK construct in Typescript:
 
 ``` ts
 const natGatewayProvider = new FckNatInstanceProvider({
-    instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO),
+    instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.NANO),
 });
 const vpc = new Vpc(this, 'vpc', {
     natGatewayProvider,
@@ -28,8 +28,8 @@ up automatically in case the NAT instance is terminated.
 You can also deploy fck-nat in non-HA mode using CDK's built-in `NatInstanceProvider` like so:
 
 ``` ts
-const natGatewayProvider = new NatInstanceProvider({
-    instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO),
+const natGatewayProvider = new NatInstanceProviderV2({
+    instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.NANO),
     machineImage: new LookupMachineImage({
         name: 'fck-nat-al2023-*-arm64-ebs',
         owners: ['568608671756'],
