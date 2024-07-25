@@ -27,6 +27,11 @@ variable "ami_groups" {
   default = []
 }
 
+variable "snapshot_groups" {
+  type = list(string)
+  default = []
+}
+
 variable "virtualization_type" {
   default = "hvm"
 }
@@ -72,6 +77,7 @@ source "amazon-ebs" "fck-nat" {
   ami_regions               = var.ami_regions
   ami_users                 = var.ami_users
   ami_groups                = var.ami_groups
+  snapshot_groups           = var.snapshot_groups
   instance_type             = "${lookup(var.instance_type, var.architecture, "error")}"
   region                    = var.region
   ssh_username              = var.ssh_username
