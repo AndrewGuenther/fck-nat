@@ -8,7 +8,7 @@ intensive to support some of fck-nat's additional features.
 
 fck-nat provides an official CDK module which supports all of fck-nat's features (namely high-availability mode)
 out-of-the-box. The CDK module is currently available both in Typescript and Python. You can find detailed
-documentation on [Construct Hub](https://constructs.dev/packages/cdk-fck-nat/v/1.0.0). Here's an example use of the
+documentation on [Construct Hub](https://constructs.dev/packages/cdk-fck-nat). Here's an example use of the
 CDK construct in Typescript:
 
 ``` ts
