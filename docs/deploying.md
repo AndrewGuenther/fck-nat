@@ -28,7 +28,7 @@ up automatically in case the NAT instance is terminated.
 You can also deploy fck-nat in non-HA mode using CDK's built-in `NatInstanceProvider` like so:
 
 ``` ts
-const natGatewayProvider = new NatInstanceProvider({
+const natGatewayProvider = new NatInstanceProviderV2({
     instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.NANO),
     machineImage: new LookupMachineImage({
         name: 'fck-nat-al2023-*-arm64-ebs',
