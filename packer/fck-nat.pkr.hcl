@@ -74,6 +74,10 @@ variable "jool_version" {
   default = "4.1.13"
 }
 
+variable "gwlb_version" {
+  default = "main"
+}
+
 source "amazon-ebs" "fck-nat" {
   ami_name                  = "fck-nat-${var.ami_prefix}${var.flavor}-${var.virtualization_type}-${var.version}-${formatdate("YYYYMMDD", timestamp())}-${var.architecture}-ebs"
   ami_virtualization_type   = var.virtualization_type
@@ -159,6 +163,36 @@ build {
       "sudo dnf install -y kpatch-runtime",
       "sudo dnf update kpatch-runtime",
       "sudo systemctl enable kpatch.service && sudo systemctl start kpatch.service",
+    ]
+  }
+
+  # Install gwlb tunnel handler
+  provisioner "shell" {
+    inline = [
+      "sudo dnf install -y cmake3 gcc g++ git",
+      "cd /opt",
+      "sudo git clone --branch ${var.gwlb_version} https://github.com/aws-samples/aws-gateway-load-balancer-tunnel-handler.git",
+      "cd aws-gateway-load-balancer-tunnel-handler",
+      "sudo sed -i 's%//#define NO_RETURN_TRAFFIC%#define NO_RETURN_TRAFFIC%' utils.h",  # Disable return GWLB interface to improve performance
+      "sudo cmake3 .",
+      "sudo make"
+    ]
+  }
+
+  provisioner "file" {
+    source = "gwlb/"
+    destination = "/tmp"
+  }
+
+  provisioner "shell" {
+    inline = [
+      "sudo mv /tmp/gwlbtun.service /usr/lib/systemd/system/gwlbtun.service",
+      "sudo mv /tmp/gwlb-up.sh /opt/aws-gateway-load-balancer-tunnel-handler/gwlb-up.sh",
+      "sudo mv /tmp/gwlbtun.conf /etc/gwlbtun.conf",
+      "sudo chmod +x /opt/aws-gateway-load-balancer-tunnel-handler/gwlb-up.sh",
+      "sudo systemctl daemon-reload",
+      "sudo systemctl disable gwlbtun.service",
+      "sudo dnf remove -y cmake3 gcc g++ git"
     ]
   }
 }
