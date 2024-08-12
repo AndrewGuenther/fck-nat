@@ -15,6 +15,8 @@ The following describes available options:
 | `eip_id`                | The ID of an Elastic IP to be attached to the public network interface. This ensures the NAT gateway public traffic is always routed through the same public IP address. |
 | `cwagent_enabled`       | If set, enables Cloudwatch agent and forward instance metrics to Cloudwatch. Requires `cwagent_cfg_param_name` to be set. |
 | `cwagent_cfg_param_name` | The name of the SSM Parameter holding the Cloudwatch agent configuration and which the agent shall pull from. Requires `cwagent_enabled` to be set. |
+| `gwlb_enabled`          | If set, enables Gateway Load Balancer support. |
+| `gwlb_health_check_port` | Overrides default port utilised for Gateway Load Balancer health check endpoint. Default: `8008` Requires `gwlb_enabled` to be set. |
 
 ## IAM Requirements
 
