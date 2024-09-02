@@ -25,7 +25,7 @@ Sitting idle, fck-nat costs 10% of a Managed NAT Gateway. In practice, the savin
 
 *"But what about AWS' NAT Instance AMI?"*
 
-The official AWS supported NAT Instance AMI hasn't been updates since 2018, is still running Amazon Linux 1 which is
+The official AWS supported NAT Instance AMI hasn't been updated since 2018, is still running Amazon Linux 1 which is
 now EOL, and has no ARM support, meaning it can't be deployed on EC2's most cost effective instance types. fck-nat.
 
 *"When would I want to use a Managed NAT Gateway instead of fck-nat?"*
