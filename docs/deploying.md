@@ -148,36 +148,46 @@ Resources:
   FckNatInterface:
     Type: AWS::EC2::NetworkInterface
     Properties:
-      Description: FckNat Gateway Interface
-      SubnetId: !Ref SubnetIdParameter
+      SubnetId: !Sub "${subnet}"
       GroupSet:
-        - !GetAtt [FckNatSecurityGroup, GroupId]
+        - Fn::GetAtt:
+            - NatSecurityGroup
+            - GroupId
       SourceDestCheck: false
+
   FckNatAsgInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Roles:
-        - !Ref FckNatRole
+        - Ref: NatRole
+
   FckNatLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
-    DependsOn: FckNatRole
     Properties:
       LaunchTemplateName: FckNatLaunchTemplate
       LaunchTemplateData:
         ImageId: !Ref FckNatAMIParameter
         InstanceType: t4g.nano
-        NetworkInterfaces:
-          - DeviceIndex: 0
-            AssociatePublicIpAddress: true
-            Groups:
-            - !GetAtt [FckNatSecurityGroup, GroupId]
         IamInstanceProfile:
-          Name: !Ref FckNatAsgInstanceProfile
+          Arn: !GetAtt FckNatAsgInstanceProfile.Arn
+        SecurityGroupIds:
+          - Fn::GetAtt:
+              - NatSecurityGroup
+              - GroupId
         UserData:
-          Fn::Base64: !Sub |
-            #!/bin/bash
-            echo "eni_id=${FckNatInterface}" >> /etc/fck-nat.conf
-            service fck-nat restart
+          Fn::Base64:
+            Fn::Join:
+              - ""
+              - - |-
+                  #!/bin/bash
+                  echo "eni_id=
+                - Ref: FckNatInterface
+                - |-
+                  " >> /etc/fck-nat.conf
+                  service fck-nat restart
+    DependsOn:
+      - NatRole
+
   FckNatAsg:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
@@ -185,30 +195,28 @@ Resources:
       MinSize: "1"
       DesiredCapacity: "1"
       LaunchTemplate:
-        LaunchTemplateId: !Ref FckNatLaunchTemplate
         Version: !GetAtt FckNatLaunchTemplate.LatestVersionNumber
+        LaunchTemplateId: !Ref FckNatLaunchTemplate
       VPCZoneIdentifier:
-        - !Ref SubnetIdParameter
-      Tags:
-        - Key: Name
-          Value: fck-nat
-          PropagateAtLaunch: true
+        - !Sub "${subnet}"
     UpdatePolicy:
       AutoScalingScheduledAction:
         IgnoreUnmodifiedGroupSizeProperties: true
-  FckNatSecurityGroup:
+
+  NatSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Security Group for FckNat
-      SecurityGroupIngress:
-        - CidrIp: !Ref CIDRParameter
+      GroupDescription: Security Group for NAT
+      SecurityGroupIngress: 
+        - CidrIp: !Sub "${CIDR}"
           IpProtocol: "-1"
       SecurityGroupEgress:
         - CidrIp: 0.0.0.0/0
           Description: Allow all outbound traffic by default
           IpProtocol: "-1"
-      VpcId: !Ref VpcIdParameter
-  FckNatRole:
+      VpcId: !Sub "${vpc}" 
+
+  NatRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -219,8 +227,7 @@ Resources:
               Service: ec2.amazonaws.com
         Version: "2012-10-17"
       Policies:
-        - PolicyName: AttachNatEniPolicy
-          PolicyDocument:
+        - PolicyDocument:
             Statement:
               - Action:
                   - ec2:AttachNetworkInterface
@@ -228,8 +235,8 @@ Resources:
                 Effect: Allow
                 Resource: "*"
             Version: "2012-10-17"
-        - PolicyName: AssociateNatAddressPolicy
-          PolicyDocument:
+          PolicyName: attachNatEniPolicy
+        - PolicyDocument:
             Statement:
               - Action:
                   - ec2:AssociateAddress
@@ -237,6 +244,7 @@ Resources:
                 Effect: Allow
                 Resource: "*"
             Version: "2012-10-17"
+          PolicyName: associateNatAddressPolicy
 ```
 
 ## Manual - Web Console
