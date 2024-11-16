@@ -7,7 +7,6 @@ packer {
   }
 }
 
-
 variable "version" {
   type = string
 }
@@ -104,6 +103,12 @@ build {
 
   provisioner "shell" {
     inline = [
+      "sudo yum install -y conntrack-tools"
+    ]
+  }
+
+  provisioner "shell" {
+    inline = [
       "sudo dnf install -y kpatch-dnf",
       "sudo dnf kernel-livepatch -y auto",
       "sudo dnf install -y kpatch-runtime",
@@ -111,4 +116,6 @@ build {
       "sudo systemctl enable kpatch.service && sudo systemctl start kpatch.service",
     ]
   }
+
+  post-processor "manifest" {}
 }
