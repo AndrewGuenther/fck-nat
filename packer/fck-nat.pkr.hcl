@@ -116,6 +116,4 @@ build {
       "sudo systemctl enable kpatch.service && sudo systemctl start kpatch.service",
     ]
   }
-
-  post-processor "manifest" {}
 }
