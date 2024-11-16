@@ -77,4 +77,33 @@ if test -n "$cwagent_enabled" && test -n "$cwagent_cfg_param_name"; then
     /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c "ssm:$cwagent_cfg_param_name"
 fi
 
+if test -n "$route_table_ids"; then
+    echo "Found route_table_ids configuration, ... "
+
+    for route_table_id in $(echo "$route_table_ids" | tr ',' ' '); do
+        echo "Routing internet traffic for $route_table_id to $instance_id"
+
+        internet_route_state=$(aws ec2 describe-route-tables \
+            --region "$aws_region" \
+            --route-table-ids "$route_table_id" \
+            --query "RouteTables[0].Routes[?DestinationCidrBlock=='0.0.0.0/0'].State | [0]" \
+            --output text)
+
+        if [ "$internet_route_state" = "active" ]; then
+            aws ec2 replace-route \
+                --region "$aws_region" \
+                --route-table-id "$route_table_id" \
+                --destination-cidr-block "0.0.0.0/0" \
+                --instance-id "$instance_id"
+        else
+            aws ec2 create-route \
+                --route-table-id "$route_table_id" \
+                --destination-cidr-block "0.0.0.0/0" \
+                --instance-id "$instance_id" \
+                --region "$aws_region"
+        fi
+        sleep 3
+    done
+fi
+
 echo "Done!"
