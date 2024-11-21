@@ -89,7 +89,7 @@ if test -n "$route_table_ids"; then
             --query "RouteTables[0].Routes[?DestinationCidrBlock=='0.0.0.0/0'].State | [0]" \
             --output text)
 
-        if [ "$internet_route_state" = "active" ]; then
+        if [ "$internet_route_state" = "active" ] || [ "$internet_route_state" = "blackhole" ]; then
             aws ec2 replace-route \
                 --region "$aws_region" \
                 --route-table-id "$route_table_id" \
