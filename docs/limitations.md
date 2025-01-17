@@ -2,7 +2,7 @@
 
 ## Availability
 
-fck-nat has some funamental limitations when it comes to availability. If the instance requires replacement, downtime
+fck-nat has some fundamental limitations when it comes to availability. If the instance requires replacement, downtime
 for the ASG (when using HA mode) to bring up a new instance is ~5 minutes, but is automatic. However, due to
 replacement nodes effectively taking over the configured internal ENI, you can significantly reduce disruption if you
 launch a second instance before the first is terminated. Existing connections will be cut, but downtime will only be
