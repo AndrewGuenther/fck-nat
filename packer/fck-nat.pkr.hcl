@@ -44,6 +44,10 @@ variable "flavor" {
   default = "al2023"
 }
 
+variable "ami_prefix" {
+  default = ""
+}
+
 variable "instance_type" {
   default = {
     "arm64"  = "t4g.micro"
