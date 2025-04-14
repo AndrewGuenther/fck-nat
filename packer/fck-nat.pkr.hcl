@@ -87,6 +87,11 @@ source "amazon-ebs" "fck-nat" {
   ssh_username              = var.ssh_username
   ssh_clear_authorized_keys = true
   temporary_key_pair_type   = "ed25519"
+  launch_block_device_mappings {
+    device_name = "/dev/xvda"
+    volume_size = 4
+    delete_on_termination = true
+  }
   source_ami_filter {
     filters = {
       virtualization-type = var.virtualization_type
