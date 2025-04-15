@@ -44,6 +44,10 @@ variable "flavor" {
   default = "al2023"
 }
 
+variable "ami_prefix" {
+  default = ""
+}
+
 variable "instance_type" {
   default = {
     "arm64"  = "t4g.micro"
@@ -68,7 +72,7 @@ variable "ssh_username" {
 }
 
 variable "jool_version" {
-  default = "4.1.7"
+  default = "4.1.13"
 }
 
 source "amazon-ebs" "fck-nat" {
@@ -83,6 +87,11 @@ source "amazon-ebs" "fck-nat" {
   ssh_username              = var.ssh_username
   ssh_clear_authorized_keys = true
   temporary_key_pair_type   = "ed25519"
+  launch_block_device_mappings {
+    device_name = "/dev/xvda"
+    volume_size = 4
+    delete_on_termination = true
+  }
   source_ami_filter {
     filters = {
       virtualization-type = var.virtualization_type
@@ -114,8 +123,8 @@ build {
   provisioner "shell" {
     start_retry_timeout = "2m"
     inline = [
-      "sudo yum install gcc make elfutils-libelf-devel kernel-devel libnl3-devel iptables-devel dkms -y",
-      "curl -L https://www.jool.mx/download/jool-${var.jool_version}.tar.gz -o- | tar xzf - --directory /tmp",
+      "sudo yum install gcc make elfutils-libelf-devel kernel-devel-`uname -r` kernel-headers-`uname -r` libnl3-devel iptables-devel dkms -y",
+      "curl -L https://github.com/NICMx/Jool/releases/download/v${var.jool_version}/jool-${var.jool_version}.tar.gz -o- | tar xzf - --directory /tmp",
       "sudo dkms install /tmp/jool-${var.jool_version}",
       "cd /tmp/jool-${var.jool_version}",
       "./configure && make && sudo make install",
