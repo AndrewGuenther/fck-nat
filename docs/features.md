@@ -100,3 +100,10 @@ fck-nat features NAT64 provided through [jool](https://www.jool.mx/en/index.html
 communicate with external IPv4 networks, working seamlessly with the AWS' DNS64 feature.
 
 This feature is built-in and does not require any specific configuration nor need to be explicitly enabled.
+
+## Gateway Load Balancer
+
+fck-nat features AWS Gateway Load Balancer support provided by the [aws-gateway-load-balancer-tunnel-handler](https://github.com/aws-samples/aws-gateway-load-balancer-tunnel-handler). GWLB support provides an alternate high availability model for advanced users while also adding support to horizontaly scale the number of fck-nat instances for users with higher bandwidth requirements.
+
+This feature is controlled via the `gwlb_enabled` directive in the [configuration file](configuration.md#configuration-file)
+and also permits an optional configuration directive `gwlb_health_check_port` to allow customisation of the TCP port utilised for GWLB health checks.

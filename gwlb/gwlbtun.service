@@ -1,0 +1,8 @@
+[Unit]
+Description=AWS GWLB Tunnel Handler
+
+[Service]
+EnvironmentFile=/etc/gwlbtun.conf
+ExecStart=/opt/aws-gateway-load-balancer-tunnel-handler/gwlbtun -c /opt/aws-gateway-load-balancer-tunnel-handler/gwlb-up.sh -p ${HEALTH_CHECK_PORT}
+Restart=always
+RestartSec=5s
