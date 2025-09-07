@@ -12,7 +12,7 @@ instance_id="$(curl -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254
 aws_region="$(curl -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/meta-data/placement/region)"
 outbound_mac="$(curl -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/meta-data/mac)"
 outbound_eni_id="$(curl -H "X-aws-ec2-metadata-token: $token" http://169.254.169.254/latest/meta-data/network/interfaces/macs/$outbound_mac/interface-id)"
-nat_interface=$(ip link show dev "$outbound_eni_id" | awk 'NR==1{gsub(":",""); print $2}' )
+nat_interface=$(ip link show dev "$outbound_eni_id" | head -n 1 | awk '{print $2}' | sed s/://g )
 
 if test -n "$eip_id"; then
     echo "Found eip_id configuration, associating $eip_id..."
