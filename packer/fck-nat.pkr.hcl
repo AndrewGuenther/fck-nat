@@ -7,7 +7,6 @@ packer {
   }
 }
 
-
 variable "version" {
   type = string
 }
@@ -99,6 +98,12 @@ build {
     inline = [
       "sudo yum install amazon-cloudwatch-agent amazon-ssm-agent iptables -y",
       "sudo yum --nogpgcheck -y localinstall /tmp/fck-nat-${var.version}-any.rpm",
+    ]
+  }
+
+  provisioner "shell" {
+    inline = [
+      "sudo yum install -y conntrack-tools"
     ]
   }
 
