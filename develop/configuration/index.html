@@ -540,6 +540,10 @@ passed only once via EC2's user data.</p>
 <td><code>cwagent_cfg_param_name</code></td>
 <td>The name of the SSM Parameter holding the Cloudwatch agent configuration and which the agent shall pull from. Requires <code>cwagent_enabled</code> to be set.</td>
 </tr>
+<tr>
+<td><code>ip_local_port_range</code></td>
+<td>Overrides Linux's <code>net.ipv4.ip_local_port_range</code> sysctl for ephemeral source ports used by SNAT. Provide as two space‑separated integers <code>low high</code> (e.g., <code>1024 65535</code>). Useful to expand the ephemeral port range and reduce NAT port exhaustion and collisions.</td>
+</tr>
 </tbody>
 </table>
 <h2 id="iam-requirements">IAM Requirements</h2>
