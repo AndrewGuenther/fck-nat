@@ -8,12 +8,12 @@ intensive to support some of fck-nat's additional features.
 
 fck-nat provides an official CDK module which supports all of fck-nat's features (namely high-availability mode)
 out-of-the-box. The CDK module is currently available both in Typescript and Python. You can find detailed
-documentation on [Construct Hub](https://constructs.dev/packages/cdk-fck-nat/v/1.0.0). Here's an example use of the
+documentation on [Construct Hub](https://constructs.dev/packages/cdk-fck-nat). Here's an example use of the
 CDK construct in Typescript:
 
 ``` ts
-const natGatewayProvier = new FckNatInstanceProvider({
-    instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO),
+const natGatewayProvider = new FckNatInstanceProvider({
+    instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.NANO),
 });
 const vpc = new Vpc(this, 'vpc', {
     natGatewayProvider,
@@ -28,8 +28,8 @@ up automatically in case the NAT instance is terminated.
 You can also deploy fck-nat in non-HA mode using CDK's built-in `NatInstanceProvider` like so:
 
 ``` ts
-const natGatewayProvider = new NatInstanceProvider({
-    instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO),
+const natGatewayProvider = new NatInstanceProviderV2({
+    instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.NANO),
     machineImage: new LookupMachineImage({
         name: 'fck-nat-al2023-*-arm64-ebs',
         owners: ['568608671756'],
@@ -129,9 +129,8 @@ This snippet assumes the following resources are already defined:
 Steps to deploy:
 
 1. Paste your VPC ID, public subnet ID, VPC CIDR block into the parameters. Set the [FckNatAMIParameter](index.md#getting-a-fck-nat-ami) based on the region fck-nat is deployed to.
-2. Ensure that your public subnet has `Enable auto-assign public IPv4 address` turned on. This can be found in the Console at `VPC > Subnets > Edit subnet settings > Auto-assign IP settings`.
-3. Deploy with CloudFormation `aws cloudformation deploy --force-upload --capabilities CAPABILITY_IAM --template-file template.yml --stack-name FckNat`
-4. Add the default route to your route table on the subnet. It is best to do this manually so you can do a seamless cut over from your existing NAT gateway. Go to `VPC > Route Tables > Private route table > Routes > Edit Routes` Add a 0.0.0.0/0 route pointing to the network interface.
+2. Deploy with CloudFormation `aws cloudformation deploy --force-upload --capabilities CAPABILITY_IAM --template-file template.yml --stack-name FckNat`
+3. Add the default route to your route table on the subnet. It is best to do this manually so you can do a seamless cut over from your existing NAT gateway. Go to `VPC > Route Tables > Private route table > Routes > Edit Routes` Add a 0.0.0.0/0 route pointing to the network interface.
 
 ``` yaml
 Parameters:
@@ -167,10 +166,13 @@ Resources:
       LaunchTemplateData:
         ImageId: !Ref FckNatAMIParameter
         InstanceType: t4g.nano
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            AssociatePublicIpAddress: true
+            Groups:
+            - !GetAtt [FckNatSecurityGroup, GroupId]
         IamInstanceProfile:
           Name: !Ref FckNatAsgInstanceProfile
-        SecurityGroupIds:
-          - !GetAtt [FckNatSecurityGroup, GroupId]
         UserData:
           Fn::Base64: !Sub |
             #!/bin/bash

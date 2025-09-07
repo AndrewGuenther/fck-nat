@@ -70,7 +70,18 @@ modprobe jool
 echo "Enabling IPv4 forwarding..."
 sysctl -q -w net.ipv4.ip_forward=1
 
-echo "Disabling IPv4 reverse path protection..."
+if test -n "$ip_local_port_range"; then
+  sysctl -q -w net.ipv4.ip_local_port_range="$ip_local_port_range"
+fi
+
+echo "Enabling ip_forward..."
+sysctl -q -w net.ipv4.ip_forward=1
+
+if test -n "$nf_conntrack_max"; then
+  sysctl -q -w net.netfilter.nf_conntrack_max="$nf_conntrack_max"
+fi
+
+echo "Disabling reverse path protection..."
 for i in $(find /proc/sys/net/ipv4/conf/ -name rp_filter) ; do
   echo 0 > $i;
 done
