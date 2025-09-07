@@ -544,6 +544,10 @@ passed only once via EC2's user data.</p>
 <td><code>ip_local_port_range</code></td>
 <td>Overrides Linux's <code>net.ipv4.ip_local_port_range</code> sysctl for ephemeral source ports used by SNAT. Provide as two space‑separated integers <code>low high</code> (e.g., <code>1024 65535</code>). Useful to expand the ephemeral port range and reduce NAT port exhaustion and collisions.</td>
 </tr>
+<tr>
+<td><code>nf_conntrack_max</code></td>
+<td>Overrides Linux's <code>net.netfilter.nf_conntrack_max</code> sysctl to set the maximum number of concurrently tracked connections. Provide as an integer (e.g., <code>262144</code>). Increasing this can help high-connection workloads but consumes more memory; monitor conntrack metrics and AWS security group connection tracking quotas.</td>
+</tr>
 </tbody>
 </table>
 <h2 id="iam-requirements">IAM Requirements</h2>
