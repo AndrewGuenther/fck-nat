@@ -57,6 +57,10 @@ else
     echo "No eni_id or interface configuration found, using default interface $nat_interface"
 fi
 
+if test -n "$ip_local_port_range"; then
+  sysctl -q -w net.ipv4.ip_local_port_range="$ip_local_port_range"
+fi
+
 echo "Enabling ip_forward..."
 sysctl -q -w net.ipv4.ip_forward=1
 
