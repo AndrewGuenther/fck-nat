@@ -24,7 +24,7 @@ al2023-ami-x86: package-rpm
 al2023-ami-nat64-x86: package-rpm
 	packer build -only=amazon-ebs.fck-nat-nat64 -var 'version=$(VERSION)' -var-file="packer/fck-nat-x86_64.pkrvars.hcl" -var-file="packer/fck-nat-al2023.pkrvars.hcl" $(regions_file) packer/fck-nat.pkr.hcl
 
-al2023-ami: al2023-ami-arm64 al2023-ami-x86
+al2023-ami: al2023-ami-arm64 al2023-ami-x86 al2023-ami-nat64-arm64 al2023-ami-nat64-x86
 
 all-amis: al2023-ami
 
