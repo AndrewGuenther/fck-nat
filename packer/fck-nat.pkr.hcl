@@ -66,6 +66,10 @@ variable "ssh_username" {
   default = "ec2-user"
 }
 
+variable "ami_prefix" {
+  default = ""
+}
+
 source "amazon-ebs" "fck-nat" {
   ami_name                  = "fck-nat-${var.ami_prefix}${var.flavor}-${var.virtualization_type}-${var.version}-${formatdate("YYYYMMDD", timestamp())}-${var.architecture}-ebs"
   ami_virtualization_type   = var.virtualization_type
