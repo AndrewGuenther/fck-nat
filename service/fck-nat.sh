@@ -62,10 +62,17 @@ else
     echo "No eni_id or interface configuration found, using default interface $nat_public_interface"
 fi
 
-echo "Setting up NAT64..."
-modprobe jool
-/usr/local/bin/jool instance flush
-/usr/local/bin/jool instance add --netfilter --pool6 64:ff9b::/96
+if test -x "/usr/local/bin/jool"; then
+    echo "Setting up NAT64..."
+    if modprobe jool; then
+        /usr/local/bin/jool instance flush
+        /usr/local/bin/jool instance add --netfilter --pool6 64:ff9b::/96
+    else
+        echo "Jool kernel module failed to load, skipping NAT64 setup."
+    fi
+else
+    echo "Jool not installed, skipping NAT64 setup."
+fi
 
 echo "Enabling IPv4 forwarding..."
 sysctl -q -w net.ipv4.ip_forward=1

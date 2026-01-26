@@ -99,4 +99,5 @@ cost you about $17/monthly, excluding free tier.
 fck-nat features NAT64 provided through [jool](https://www.jool.mx/en/index.html) as a mean to allow IPv6-only networks to
 communicate with external IPv4 networks, working seamlessly with the AWS' DNS64 feature.
 
-This feature is built-in and does not require any specific configuration nor need to be explicitly enabled.
+This feature is available in the NAT64-enabled AMIs (prefixed with `nat64-`) and is enabled at runtime only when jool
+is installed.

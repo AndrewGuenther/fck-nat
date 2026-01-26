@@ -43,10 +43,6 @@ variable "flavor" {
   default = "al2023"
 }
 
-variable "ami_prefix" {
-  default = ""
-}
-
 variable "instance_type" {
   default = {
     "arm64"  = "t4g.micro"
@@ -74,40 +70,101 @@ variable "jool_version" {
   default = "4.1.13"
 }
 
-source "amazon-ebs" "fck-nat" {
-  ami_name                  = "fck-nat-${var.ami_prefix}${var.flavor}-${var.virtualization_type}-${var.version}-${formatdate("YYYYMMDD", timestamp())}-${var.architecture}-ebs"
-  ami_virtualization_type   = var.virtualization_type
-  ami_regions               = var.ami_regions
-  ami_users                 = var.ami_users
-  ami_groups                = var.ami_groups
-  snapshot_groups           = var.snapshot_groups
-  instance_type             = "${lookup(var.instance_type, var.architecture, "error")}"
-  region                    = var.region
-  ssh_username              = var.ssh_username
-  ssh_clear_authorized_keys = true
-  temporary_key_pair_type   = "ed25519"
-  launch_block_device_mappings {
-    device_name = "/dev/xvda"
-    volume_size = 4
+locals {
+  common_source = {
+    ami_virtualization_type   = var.virtualization_type
+    ami_regions               = var.ami_regions
+    ami_users                 = var.ami_users
+    ami_groups                = var.ami_groups
+    snapshot_groups           = var.snapshot_groups
+    instance_type             = lookup(var.instance_type, var.architecture, "error")
+    region                    = var.region
+    ssh_username              = var.ssh_username
+    ssh_clear_authorized_keys = true
+    temporary_key_pair_type   = "ed25519"
+  }
+
+  launch_block_device_mapping = {
+    device_name           = "/dev/xvda"
+    volume_size           = 4
     delete_on_termination = true
   }
-  source_ami_filter {
+
+  source_ami_filter = {
     filters = {
       virtualization-type = var.virtualization_type
       architecture        = var.architecture
       name                = var.base_image_name
       root-device-type    = "ebs"
     }
-    owners = [
-      var.base_image_owner
-    ]
+    owners      = [var.base_image_owner]
     most_recent = true
+  }
+}
+
+source "amazon-ebs" "fck-nat" {
+  ami_name                  = "fck-nat-${var.flavor}-${var.virtualization_type}-${var.version}-${formatdate("YYYYMMDD", timestamp())}-${var.architecture}-ebs"
+  ami_virtualization_type   = local.common_source.ami_virtualization_type
+  ami_regions               = local.common_source.ami_regions
+  ami_users                 = local.common_source.ami_users
+  ami_groups                = local.common_source.ami_groups
+  snapshot_groups           = local.common_source.snapshot_groups
+  instance_type             = local.common_source.instance_type
+  region                    = local.common_source.region
+  ssh_username              = local.common_source.ssh_username
+  ssh_clear_authorized_keys = local.common_source.ssh_clear_authorized_keys
+  temporary_key_pair_type   = local.common_source.temporary_key_pair_type
+  dynamic "launch_block_device_mappings" {
+    for_each = [local.launch_block_device_mapping]
+    content {
+      device_name           = launch_block_device_mappings.value.device_name
+      volume_size           = launch_block_device_mappings.value.volume_size
+      delete_on_termination = launch_block_device_mappings.value.delete_on_termination
+    }
+  }
+  dynamic "source_ami_filter" {
+    for_each = [local.source_ami_filter]
+    content {
+      filters     = source_ami_filter.value.filters
+      owners      = source_ami_filter.value.owners
+      most_recent = source_ami_filter.value.most_recent
+    }
+  }
+}
+
+source "amazon-ebs" "fck-nat-nat64" {
+  ami_name                  = "fck-nat-nat64-${var.flavor}-${var.virtualization_type}-${var.version}-${formatdate("YYYYMMDD", timestamp())}-${var.architecture}-ebs"
+  ami_virtualization_type   = local.common_source.ami_virtualization_type
+  ami_regions               = local.common_source.ami_regions
+  ami_users                 = local.common_source.ami_users
+  ami_groups                = local.common_source.ami_groups
+  snapshot_groups           = local.common_source.snapshot_groups
+  instance_type             = local.common_source.instance_type
+  region                    = local.common_source.region
+  ssh_username              = local.common_source.ssh_username
+  ssh_clear_authorized_keys = local.common_source.ssh_clear_authorized_keys
+  temporary_key_pair_type   = local.common_source.temporary_key_pair_type
+  dynamic "launch_block_device_mappings" {
+    for_each = [local.launch_block_device_mapping]
+    content {
+      device_name           = launch_block_device_mappings.value.device_name
+      volume_size           = launch_block_device_mappings.value.volume_size
+      delete_on_termination = launch_block_device_mappings.value.delete_on_termination
+    }
+  }
+  dynamic "source_ami_filter" {
+    for_each = [local.source_ami_filter]
+    content {
+      filters     = source_ami_filter.value.filters
+      owners      = source_ami_filter.value.owners
+      most_recent = source_ami_filter.value.most_recent
+    }
   }
 }
 
 build {
   name = "fck-nat"
-  sources = ["source.amazon-ebs.fck-nat"]
+  sources = ["source.amazon-ebs.fck-nat", "source.amazon-ebs.fck-nat-nat64"]
 
   # Install updates
   provisioner "shell" {
@@ -121,6 +178,7 @@ build {
   # Install jool for NAT64
   provisioner "shell" {
     start_retry_timeout = "2m"
+    only = ["amazon-ebs.fck-nat-nat64"]
     inline = [
       "sudo yum install gcc make elfutils-libelf-devel kernel-devel-`uname -r` kernel-headers-`uname -r` libnl3-devel iptables-devel dkms -y",
       "curl -L https://github.com/NICMx/Jool/releases/download/v${var.jool_version}/jool-${var.jool_version}.tar.gz -o- | tar xzf - --directory /tmp",
