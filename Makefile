@@ -1,5 +1,8 @@
 VERSION := 1.3.0
 
+export AWS_MAX_ATTEMPTS=120
+export AWS_POLL_DELAY_SECONDS=15
+
 package: package-rpm
 
 ensure-build:
