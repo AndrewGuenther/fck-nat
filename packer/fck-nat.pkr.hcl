@@ -58,6 +58,14 @@ variable "region" {
   default = "us-west-2"
 }
 
+variable "vpc_id" {
+  type    = string
+}
+
+variable "subnet_id" {
+  type    = string
+}
+
 variable "base_image_name" {
   default = "*al2023-ami-minimal-*-kernel-*"
 }
@@ -72,6 +80,10 @@ variable "ssh_username" {
 
 variable "jool_version" {
   default = "4.1.13"
+}
+
+variable "boost_version" {
+  default = "1.83.0"
 }
 
 variable "gwlb_version" {
@@ -90,6 +102,8 @@ source "amazon-ebs" "fck-nat" {
   ssh_username              = var.ssh_username
   ssh_clear_authorized_keys = true
   temporary_key_pair_type   = "ed25519"
+  vpc_id                  = var.vpc_id != "" ? var.vpc_id : null
+  subnet_id               = var.subnet_id != "" ? var.subnet_id : null
   launch_block_device_mappings {
     device_name = "/dev/xvda"
     volume_size = 4
@@ -170,6 +184,10 @@ build {
   provisioner "shell" {
     inline = [
       "sudo dnf install -y cmake3 gcc g++ git",
+      "cd /home/${var.ssh_username}",
+      "curl -L -o boost.tar.gz https://archives.boost.io/release/${var.boost_version}/source/boost_${replace(var.boost_version, ".", "_")}.tar.gz",
+      "tar -xzf boost.tar.gz",
+      "mv boost_${replace(var.boost_version, ".", "_")} boost",
       "cd /opt",
       "sudo git clone --branch ${var.gwlb_version} https://github.com/aws-samples/aws-gateway-load-balancer-tunnel-handler.git",
       "cd aws-gateway-load-balancer-tunnel-handler",
