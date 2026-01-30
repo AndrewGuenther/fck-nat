@@ -140,7 +140,7 @@ build {
   provisioner "shell" {
     start_retry_timeout = "2m"
     inline = [
-      "sudo yum install gcc make elfutils-libelf-devel kernel-devel-`uname -r` kernel-headers-`uname -r` libnl3-devel iptables-devel dkms -y",
+      "sudo yum install gcc make elfutils-libelf-devel kernel-devel kernel-headers libnl3-devel iptables-devel dkms -y",
       "curl -L https://github.com/NICMx/Jool/releases/download/v${var.jool_version}/jool-${var.jool_version}.tar.gz -o- | tar xzf - --directory /tmp",
       "sudo dkms install /tmp/jool-${var.jool_version}",
       "cd /tmp/jool-${var.jool_version}",
