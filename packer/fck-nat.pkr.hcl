@@ -74,6 +74,10 @@ variable "jool_version" {
   default = "4.1.13"
 }
 
+variable "boost_version" {
+  default = "1.83.0"
+}
+
 variable "gwlb_version" {
   default = "main"
 }
@@ -171,9 +175,13 @@ build {
     inline = [
       "sudo dnf install -y cmake3 gcc g++ git",
       "cd /opt",
+      "sudo curl -L -o boost.tar.gz https://archives.boost.io/release/${var.boost_version}/source/boost_${replace(var.boost_version, ".", "_")}.tar.gz",
+      "sudo tar -xzf boost.tar.gz",
+      "sudo mv boost_${replace(var.boost_version, ".", "_")} boost",
       "sudo git clone --branch ${var.gwlb_version} https://github.com/aws-samples/aws-gateway-load-balancer-tunnel-handler.git",
       "cd aws-gateway-load-balancer-tunnel-handler",
       "sudo sed -i 's%//#define NO_RETURN_TRAFFIC%#define NO_RETURN_TRAFFIC%' utils.h",  # Disable return GWLB interface to improve performance
+      "sudo sed -i 's%set(Boost_INCLUDE_DIR /home/ec2-user/boost)%set(Boost_INCLUDE_DIR /opt/boost)%' CMakeLists.txt", # Modify boost package location
       "sudo cmake3 .",
       "sudo make"
     ]
@@ -192,7 +200,9 @@ build {
       "sudo chmod +x /opt/aws-gateway-load-balancer-tunnel-handler/gwlb-up.sh",
       "sudo systemctl daemon-reload",
       "sudo systemctl disable gwlbtun.service",
-      "sudo dnf remove -y cmake3 gcc g++ git"
+      "sudo dnf remove -y cmake3 gcc g++ git",
+      "sudo rm -f /opt/boost.tar.gz",
+      "sudo rm -rf /opt/boost"
     ]
   }
 }

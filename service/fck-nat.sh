@@ -117,6 +117,10 @@ if test -n "$gwlb_enabled"; then
     fi
     # restart instead of start ensures changes to gwlb config are picked up on fck-nat restart
     systemctl restart gwlbtun
+else
+    # stop gwlbtun service
+    echo "Stopping GWLB tunnel handler..."
+    systemctl stop gwlbtun
 fi
 
 echo "Done!"
