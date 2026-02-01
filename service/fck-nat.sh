@@ -103,4 +103,24 @@ if test -n "$cwagent_enabled" && test -n "$cwagent_cfg_param_name"; then
     /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c "ssm:$cwagent_cfg_param_name"
 fi
 
+if test -n "$gwlb_enabled"; then
+    echo "Found gwlb_enabled configuration, start GWLB tunnel handler..."
+    # Add NAT public interface to config file so it can be used in gwlb hook script
+    sed -ie "/^NAT_PUBLIC_INTERFACE/ s/=.*$/=$nat_public_interface/" /etc/gwlbtun.conf
+    # Set default rp_filter value for gwlb inbound interfaces
+    echo "net.ipv4.conf.gwi-*.rp_filter = 0" > /etc/sysctl.d/90-gwlbtun.conf
+    if test -n "$gwlb_health_check_port"; then
+        echo "Found gwlb_health_check_port configuration, setting health check port to $gwlb_health_check_port"
+	    sed -ie "/^HEALTH_CHECK_PORT/ s/=.*$/=$gwlb_health_check_port/" /etc/gwlbtun.conf
+    else
+        sed -ie '/^HEALTH_CHECK_PORT/ s/=.*$/=8008/' /etc/gwlbtun.conf
+    fi
+    # restart instead of start ensures changes to gwlb config are picked up on fck-nat restart
+    systemctl restart gwlbtun
+else
+    # stop gwlbtun service
+    echo "Stopping GWLB tunnel handler..."
+    systemctl stop gwlbtun
+fi
+
 echo "Done!"

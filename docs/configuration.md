@@ -17,6 +17,8 @@ The following describes available options:
 | `cwagent_cfg_param_name` | The name of the SSM Parameter holding the Cloudwatch agent configuration and which the agent shall pull from. Requires `cwagent_enabled` to be set. |
 | `ip_local_port_range`   | Overrides Linux's `net.ipv4.ip_local_port_range` sysctl for ephemeral source ports used by SNAT. Provide as two space‑separated integers `low high` (e.g., `1024 65535`). Useful to expand the ephemeral port range and reduce NAT port exhaustion and collisions. |
 | `nf_conntrack_max`      | Overrides Linux's `net.netfilter.nf_conntrack_max` sysctl to set the maximum number of concurrently tracked connections. Provide as an integer (e.g., `262144`). Increasing this can help high-connection workloads but consumes more memory; monitor conntrack metrics and AWS security group connection tracking quotas. |
+| `gwlb_enabled`          | If set, enables Gateway Load Balancer support. |
+| `gwlb_health_check_port` | Overrides default port utilised for Gateway Load Balancer health check endpoint. Default: `8008` Requires `gwlb_enabled` to be set. |
 
 ## IAM Requirements
 
