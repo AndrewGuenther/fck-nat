@@ -492,6 +492,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#nat64" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NAT64
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -591,6 +602,17 @@
     <span class="md-ellipsis">
       
         Metrics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nat64" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NAT64
       
     </span>
   </a>
@@ -698,6 +720,11 @@ provided in the managed NAT Gateway:</p>
 <p>Ensure you are aware of Cloudwatch metrics costs before enabling Cloudwatch agent. The above configuration would
 cost you about $17/monthly, excluding free tier.  </p>
 <p><strong>IAM requirements</strong>: <code>ssm:GetParameter</code> on the SSM Parameter ARN, and <code>cloudwatch:PutMetricData</code> on <code>*</code>.</p>
+<h2 id="nat64">NAT64</h2>
+<p>fck-nat features NAT64 provided through <a href="https://www.jool.mx/en/index.html">jool</a> as a mean to allow IPv6-only networks to
+communicate with external IPv4 networks, working seamlessly with the AWS' DNS64 feature.</p>
+<p>This feature is available in the NAT64-enabled AMIs (prefixed with <code>nat64-</code>) and is enabled at runtime only when jool
+is installed.</p>
 
 
 
