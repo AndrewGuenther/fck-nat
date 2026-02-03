@@ -55,7 +55,7 @@ variable "region" {
 }
 
 variable "base_image_name" {
-  default = "*al2023-ami-minimal-*-kernel-*"
+  default = "*al2023-ami-minimal-*-kernel-6.12-*"
 }
 
 variable "base_image_owner" {
@@ -180,13 +180,13 @@ build {
     start_retry_timeout = "2m"
     only = ["amazon-ebs.fck-nat-nat64"]
     inline = [
-      "sudo yum install gcc make elfutils-libelf-devel kernel-devel-`uname -r` kernel-headers-`uname -r` libnl3-devel iptables-devel dkms -y",
+      "sudo yum install gcc make elfutils-libelf-devel kernel6.12-devel-`uname -r` kernel6.12-headers-`uname -r` libnl3-devel iptables-devel dkms -y",
       "curl -L https://github.com/NICMx/Jool/releases/download/v${var.jool_version}/jool-${var.jool_version}.tar.gz -o- | tar xzf - --directory /tmp",
       "sudo dkms install /tmp/jool-${var.jool_version}",
       "cd /tmp/jool-${var.jool_version}",
       "./configure && make && sudo make install",
       "sudo rm -rf /tmp/jool-${var.jool_version}",
-      "sudo yum remove gcc make elfutils-libelf-devel kernel-devel libnl3-devel iptables-devel -y"
+      "sudo yum remove gcc make elfutils-libelf-devel kernel6.12-devel libnl3-devel iptables-devel -y"
     ]
   }
   
