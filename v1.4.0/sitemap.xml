@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://fck-nat.dev/v1.4.0/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://fck-nat.dev/v1.4.0/choosing_an_instance_size/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://fck-nat.dev/v1.4.0/configuration/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://fck-nat.dev/v1.4.0/deploying/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://fck-nat.dev/v1.4.0/features/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+    <url>
+         <loc>https://fck-nat.dev/v1.4.0/limitations/</loc>
+         <lastmod>2026-02-03</lastmod>
+    </url>
+</urlset>
