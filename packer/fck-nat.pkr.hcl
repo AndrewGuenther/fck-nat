@@ -67,7 +67,7 @@ variable "ssh_username" {
 }
 
 variable "jool_version" {
-  default = "4.1.13"
+  default = "4.1.15"
 }
 
 locals {
