@@ -93,11 +93,18 @@ for i in $(find /proc/sys/net/ipv4/conf/ -name rp_filter) ; do
   echo 0 > $i;
 done
 
-echo "Flushing IPv4 NAT table..."
-iptables -t nat -F
+echo "Flushing fck-nat nftables ruleset..."
+nft delete table ip fck-nat 2>/dev/null || true
 
-echo "Adding IPv4 NAT rules..."
-iptables -t nat -A POSTROUTING -o "$nat_public_interface" -j MASQUERADE -m comment --comment "NAT routing rule installed by fck-nat"
+echo "Applying fck-nat nftables rules..."
+nft -f - <<EOF
+table ip fck-nat {
+    chain postrouting {
+        type nat hook postrouting priority 100; policy accept;
+        oifname "$nat_public_interface" masquerade comment "NAT routing rule installed by fck-nat"
+    }
+}
+EOF
 
 echo "Enabling IPv6 forwarding..."
 sysctl -q -w net.ipv6.conf."$nat_public_interface".accept_ra=2
