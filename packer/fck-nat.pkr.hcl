@@ -31,12 +31,20 @@ variable "snapshot_groups" {
   default = []
 }
 
+variable "prefix" {
+  default = "fck-nat"
+}
+
 variable "virtualization_type" {
   default = "hvm"
 }
 
 variable "architecture" {
   default = "arm64"
+}
+
+variable "suffix" {
+  default = "ebs"
 }
 
 variable "flavor" {
@@ -103,7 +111,7 @@ locals {
 }
 
 source "amazon-ebs" "fck-nat" {
-  ami_name                  = "fck-nat-${var.flavor}-${var.virtualization_type}-${var.version}-${formatdate("YYYYMMDD", timestamp())}-${var.architecture}-ebs"
+  ami_name                  = "${var.prefix}-${var.flavor}-${var.virtualization_type}-${var.version}-${formatdate("YYYYMMDD", timestamp())}-${var.architecture}-${var.suffix}"
   ami_virtualization_type   = local.common_source.ami_virtualization_type
   ami_regions               = local.common_source.ami_regions
   ami_users                 = local.common_source.ami_users
@@ -189,7 +197,7 @@ build {
       "sudo yum remove gcc make elfutils-libelf-devel kernel6.12-devel libnl3-devel iptables-devel -y"
     ]
   }
-  
+
   provisioner "file" {
     source = "build/fck-nat-${var.version}-any.rpm"
     destination = "/tmp/fck-nat-${var.version}-any.rpm"
