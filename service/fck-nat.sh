@@ -81,9 +81,6 @@ if test -n "$ip_local_port_range"; then
   sysctl -q -w net.ipv4.ip_local_port_range="$ip_local_port_range"
 fi
 
-echo "Enabling ip_forward..."
-sysctl -q -w net.ipv4.ip_forward=1
-
 if test -n "$nf_conntrack_max"; then
   sysctl -q -w net.netfilter.nf_conntrack_max="$nf_conntrack_max"
 fi
