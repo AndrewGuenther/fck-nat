@@ -1,0 +1,75 @@
+name: Publish Refreshed AMIs (Scheduled)
+
+# Periodically rebuilds the latest released fck-nat AMI from current source
+# packages and re-publishes it to all supported regions. The package version
+# is not bumped — the publish-date suffix in the AMI name (YYYYMMDD) is what
+# changes between refreshes.
+#
+# Why this exists: AWS auto-deprecates public AMIs at 2 years. Without a
+# scheduled refresh, the current released AMIs would silently disappear from
+# default `DescribeImages` results once they hit that wall. See issue #107.
+
+on:
+  schedule:
+    # 00:00 UTC on the 1st of January and July (every 6 months).
+    - cron: '0 0 1 1,7 *'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref to build (default: latest release tag)'
+        required: false
+        default: ''
+
+permissions:
+  id-token: write   # OIDC federation to AWS
+  contents: read
+
+concurrency:
+  group: ami-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history for tag resolution)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve build ref
+        id: ref
+        run: |
+          if [ -n "${{ inputs.ref }}" ]; then
+            REF="${{ inputs.ref }}"
+          else
+            REF="$(git describe --tags --abbrev=0)"
+          fi
+          echo "ref=${REF}" >> "${GITHUB_OUTPUT}"
+          echo "Resolved ref: ${REF}"
+
+      - name: Check out resolved ref
+        run: git checkout "${{ steps.ref.outputs.ref }}"
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_PUBLISH_ROLE_ARN }}
+          aws-region: us-west-2
+
+      - name: Install Packer
+        uses: hashicorp/setup-packer@v3
+        with:
+          version: latest
+
+      - name: Install fpm
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ruby ruby-dev rpm
+          sudo gem install --no-document fpm
+
+      - name: Initialize Packer plugins
+        run: packer init packer/fck-nat.pkr.hcl
+
+      - name: Publish all AMIs
+        run: make publish
