@@ -88,6 +88,29 @@ if test -n "$nf_conntrack_max"; then
   sysctl -q -w net.netfilter.nf_conntrack_max="$nf_conntrack_max"
 fi
 
+# Optional production-load tuning knobs (see #40).
+# Each is opt-in via /etc/fck-nat.conf — defaults preserve current behavior.
+
+if test -n "$nf_conntrack_buckets"; then
+  # Hash-table sizing for the conntrack store. Rule of thumb: nf_conntrack_max / 4 or 8.
+  # Must be written to /sys (not via sysctl -w which is read-only for this knob).
+  echo "$nf_conntrack_buckets" > /sys/module/nf_conntrack/parameters/hashsize
+fi
+
+if test -n "$nf_conntrack_tcp_timeout_established"; then
+  # Default 432000s (5 days) is too long for many high-turnover NAT workloads.
+  # Lowering frees conntrack slots faster at the cost of dropping idle long-lived connections sooner.
+  sysctl -q -w net.netfilter.nf_conntrack_tcp_timeout_established="$nf_conntrack_tcp_timeout_established"
+fi
+
+if test -n "$tcp_keepalive_time"; then
+  sysctl -q -w net.ipv4.tcp_keepalive_time="$tcp_keepalive_time"
+fi
+
+if test -n "$tcp_max_syn_backlog"; then
+  sysctl -q -w net.ipv4.tcp_max_syn_backlog="$tcp_max_syn_backlog"
+fi
+
 echo "Disabling reverse path protection..."
 for i in $(find /proc/sys/net/ipv4/conf/ -name rp_filter) ; do
   echo 0 > $i;
