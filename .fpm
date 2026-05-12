@@ -1,7 +1,8 @@
 -s dir
 --name fck-nat
 --license mit
---architecture all
+--architecture noarch
+--rpm-os linux
 --description "A NAT instance konfigurator"
 --url "https://github.com/AndrewGuenther/fck-nat"
 --maintainer "Andrew Guenther <guenther.andrew.j@gmail.com>"
