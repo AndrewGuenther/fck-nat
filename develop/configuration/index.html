@@ -612,6 +612,22 @@ passed only once via EC2's user data.</p>
 <td><code>nf_conntrack_max</code></td>
 <td>Overrides Linux's <code>net.netfilter.nf_conntrack_max</code> sysctl to set the maximum number of concurrently tracked connections. Provide as an integer (e.g., <code>262144</code>). Increasing this can help high-connection workloads but consumes more memory; monitor conntrack metrics and AWS security group connection tracking quotas.</td>
 </tr>
+<tr>
+<td><code>nf_conntrack_buckets</code></td>
+<td>Sizes the conntrack hash table (written to <code>/sys/module/nf_conntrack/parameters/hashsize</code>). Provide as an integer. A common rule of thumb is <code>nf_conntrack_max / 4</code>. Undersizing this with a large <code>nf_conntrack_max</code> degrades lookup performance; oversizing wastes memory.</td>
+</tr>
+<tr>
+<td><code>nf_conntrack_tcp_timeout_established</code></td>
+<td>Overrides <code>net.netfilter.nf_conntrack_tcp_timeout_established</code> (default 432000s = 5 days). Lowering frees conntrack slots from idle established connections faster, at the cost of dropping long-lived idle connections sooner. Useful for high-turnover workloads where the default retention floods the table with stale entries.</td>
+</tr>
+<tr>
+<td><code>tcp_keepalive_time</code></td>
+<td>Overrides <code>net.ipv4.tcp_keepalive_time</code> (default 7200s = 2 hours). Interval before the kernel sends the first keepalive probe on an otherwise idle TCP connection. Lower values surface dead peers faster but generate more keepalive traffic.</td>
+</tr>
+<tr>
+<td><code>tcp_max_syn_backlog</code></td>
+<td>Overrides <code>net.ipv4.tcp_max_syn_backlog</code> for the maximum number of half-open connections in the SYN queue. Relevant for high-concurrency bursts; raise if <code>netstat -s</code> shows SYN queue overflows under load.</td>
+</tr>
 </tbody>
 </table>
 <h2 id="iam-requirements">IAM Requirements</h2>
