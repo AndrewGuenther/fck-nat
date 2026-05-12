@@ -12,23 +12,27 @@ variable "version" {
 }
 
 variable "ami_regions" {
-  type = list(string)
+  type    = list(string)
   default = []
 }
 
 variable "ami_users" {
-  type = list(string)
+  type    = list(string)
   default = []
 }
 
 variable "ami_groups" {
-  type = list(string)
+  type    = list(string)
   default = []
 }
 
 variable "snapshot_groups" {
-  type = list(string)
+  type    = list(string)
   default = []
+}
+
+variable "prefix" {
+  default = "fck-nat"
 }
 
 variable "virtualization_type" {
@@ -37,6 +41,10 @@ variable "virtualization_type" {
 
 variable "architecture" {
   default = "arm64"
+}
+
+variable "suffix" {
+  default = "ebs"
 }
 
 variable "flavor" {
@@ -103,7 +111,7 @@ locals {
 }
 
 source "amazon-ebs" "fck-nat" {
-  ami_name                  = "fck-nat-${var.flavor}-${var.virtualization_type}-${var.version}-${formatdate("YYYYMMDD", timestamp())}-${var.architecture}-ebs"
+  ami_name                  = "${var.prefix}-${var.flavor}-${var.virtualization_type}-${var.version}-${formatdate("YYYYMMDD", timestamp())}-${var.architecture}-${var.suffix}"
   ami_virtualization_type   = local.common_source.ami_virtualization_type
   ami_regions               = local.common_source.ami_regions
   ami_users                 = local.common_source.ami_users
@@ -133,7 +141,7 @@ source "amazon-ebs" "fck-nat" {
 }
 
 source "amazon-ebs" "fck-nat-nat64" {
-  ami_name                  = "fck-nat-nat64-${var.flavor}-${var.virtualization_type}-${var.version}-${formatdate("YYYYMMDD", timestamp())}-${var.architecture}-ebs"
+  ami_name                  = "${var.prefix}-nat64-${var.flavor}-${var.virtualization_type}-${var.version}-${formatdate("YYYYMMDD", timestamp())}-${var.architecture}-${var.suffix}"
   ami_virtualization_type   = local.common_source.ami_virtualization_type
   ami_regions               = local.common_source.ami_regions
   ami_users                 = local.common_source.ami_users
@@ -163,7 +171,7 @@ source "amazon-ebs" "fck-nat-nat64" {
 }
 
 build {
-  name = "fck-nat"
+  name    = "fck-nat"
   sources = ["source.amazon-ebs.fck-nat", "source.amazon-ebs.fck-nat-nat64"]
 
   # Install updates
@@ -178,7 +186,7 @@ build {
   # Install jool for NAT64
   provisioner "shell" {
     start_retry_timeout = "2m"
-    only = ["amazon-ebs.fck-nat-nat64"]
+    only                = ["amazon-ebs.fck-nat-nat64"]
     inline = [
       "sudo yum install gcc make elfutils-libelf-devel kernel6.12-devel-`uname -r` kernel6.12-headers-`uname -r` libnl3-devel iptables-devel dkms -y",
       "curl -L https://github.com/NICMx/Jool/releases/download/v${var.jool_version}/jool-${var.jool_version}.tar.gz -o- | tar xzf - --directory /tmp",
@@ -189,9 +197,9 @@ build {
       "sudo yum remove gcc make elfutils-libelf-devel kernel6.12-devel libnl3-devel iptables-devel -y"
     ]
   }
-  
+
   provisioner "file" {
-    source = "build/fck-nat-${var.version}-any.rpm"
+    source      = "build/fck-nat-${var.version}-any.rpm"
     destination = "/tmp/fck-nat-${var.version}-any.rpm"
   }
 
