@@ -17,4 +17,4 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/security-group-connection-tr
 If you're running fck-nat with [additional CloudWatch monitoring enabled](features.md#metrics) we report the
 `conntrack_allowance_exceeded` and `conntrack_allowance_available` metrics which would enable you to observe if these
 conntrack limits are being hit. If you're hitting these limits, it is recommended that you allow all traffic in
-security groups and use `iptables` in order to drop inbound connections from outside your VPC.
+security groups and use `nftables` in order to drop inbound connections from outside your VPC.
