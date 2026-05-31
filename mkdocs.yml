@@ -35,6 +35,7 @@ nav:
   - Configuration: configuration.md
   - Features: features.md
   - Limitations: limitations.md
+  - AMI Support Policy: ami-support-policy.md
 
 markdown_extensions:
   - tables

@@ -1,0 +1,86 @@
+name: Publish AMIs (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: Release tag to build. Defaults to the latest GitHub release tag.
+        required: false
+        type: string
+        default: ''
+    secrets:
+      AWS_PUBLISH_ROLE_ARN:
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve build ref and version
+        id: build
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          INPUT_TAG: ${{ inputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -n "${INPUT_TAG}" ]; then
+            TAG="${INPUT_TAG}"
+          else
+            TAG="$(gh release view --repo "${GH_REPO}" --json tagName --jq .tagName)"
+          fi
+
+          if [[ ! "${TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Release tag must match vMAJOR.MINOR.PATCH: ${TAG}" >&2
+            exit 1
+          fi
+
+          RELEASE_TAG="$(gh release view "${TAG}" --repo "${GH_REPO}" --json tagName --jq .tagName)"
+          if [ "${RELEASE_TAG}" != "${TAG}" ]; then
+            echo "Release tag mismatch: expected ${TAG}, got ${RELEASE_TAG}" >&2
+            exit 1
+          fi
+
+          VERSION="${TAG#v}"
+
+          echo "ref=${TAG}" >> "${GITHUB_OUTPUT}"
+          echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "Resolved ref: ${TAG}"
+          echo "Resolved version: ${VERSION}"
+
+      - name: Checkout build ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.build.outputs.ref }}
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          # Repository secret value: arn:aws:iam::568608671756:role/GithubActions-fck-nat
+          role-to-assume: ${{ secrets.AWS_PUBLISH_ROLE_ARN }}
+          aws-region: us-west-2
+
+      - name: Install Packer
+        uses: hashicorp/setup-packer@v3
+        with:
+          version: latest
+
+      - name: Install fpm
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ruby ruby-dev rpm
+          sudo gem install --no-document fpm
+
+      - name: Initialize Packer plugins
+        run: packer init packer/fck-nat.pkr.hcl
+
+      - name: Publish all AMIs
+        env:
+          VERSION: ${{ steps.build.outputs.version }}
+        run: make publish VERSION="${VERSION}"

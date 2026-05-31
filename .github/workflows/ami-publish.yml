@@ -1,0 +1,37 @@
+name: Publish Refreshed AMIs (Scheduled)
+
+# Periodically rebuilds the latest released fck-nat AMI and re-publishes it
+# to all supported regions. The package version is not bumped; the
+# publish-date suffix in the AMI name (YYYYMMDD) is what
+# changes between refreshes.
+#
+# Why this exists: AWS auto-deprecates public AMIs at 2 years. Without a
+# scheduled refresh, the current released AMIs would silently disappear from
+# default `DescribeImages` results once they hit that wall. See issue #107.
+
+on:
+  schedule:
+    # 00:00 UTC on the 1st of January and July (every 6 months).
+    - cron: '0 0 1 1,7 *'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to refresh (default: latest GitHub release tag)'
+        required: false
+        default: ''
+
+permissions:
+  id-token: write   # OIDC federation to AWS
+  contents: read
+
+concurrency:
+  group: ami-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    uses: ./.github/workflows/ami-publish-common.yml
+    with:
+      tag: ${{ inputs.tag || '' }}
+    secrets:
+      AWS_PUBLISH_ROLE_ARN: ${{ secrets.AWS_PUBLISH_ROLE_ARN }}

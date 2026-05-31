@@ -1,0 +1,31 @@
+name: Publish AMIs (Release)
+
+# Builds and publishes fck-nat AMIs when a GitHub release is published.
+# The release tag (e.g. v1.4.0) drives the package VERSION used by the
+# Makefile. The publish-date suffix is appended automatically in the
+# Packer template.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to build (e.g. v1.4.0)'
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: ami-release-${{ github.event.release.tag_name || inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    uses: ./.github/workflows/ami-publish-common.yml
+    with:
+      tag: ${{ github.event.release.tag_name || inputs.tag }}
+    secrets:
+      AWS_PUBLISH_ROLE_ARN: ${{ secrets.AWS_PUBLISH_ROLE_ARN }}
