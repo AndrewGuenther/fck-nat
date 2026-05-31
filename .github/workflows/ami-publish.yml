@@ -19,6 +19,10 @@ on:
         description: 'Release tag to refresh (default: latest GitHub release tag)'
         required: false
         default: ''
+      target:
+        description: 'Make target to publish (default: all-amis)'
+        required: false
+        default: all-amis
 
 permissions:
   id-token: write   # OIDC federation to AWS
@@ -33,5 +37,6 @@ jobs:
     uses: ./.github/workflows/ami-publish-common.yml
     with:
       tag: ${{ inputs.tag || '' }}
+      target: ${{ inputs.target || 'all-amis' }}
     secrets:
       AWS_PUBLISH_ROLE_ARN: ${{ secrets.AWS_PUBLISH_ROLE_ARN }}

@@ -8,6 +8,11 @@ on:
         required: false
         type: string
         default: ''
+      target:
+        description: Make target to publish. Defaults to all AMIs.
+        required: false
+        type: string
+        default: all-amis
     secrets:
       AWS_PUBLISH_ROLE_ARN:
         required: true
@@ -80,7 +85,8 @@ jobs:
       - name: Initialize Packer plugins
         run: packer init packer/fck-nat.pkr.hcl
 
-      - name: Publish all AMIs
+      - name: Publish AMIs
         env:
           VERSION: ${{ steps.build.outputs.version }}
-        run: make publish VERSION="${VERSION}"
+          TARGET: ${{ inputs.target }}
+        run: make VERSION="${VERSION}" regions_file=-var-file=packer/fck-nat-public-all-regions.pkrvars.hcl -- "${TARGET}"

@@ -13,6 +13,10 @@ on:
       tag:
         description: 'Release tag to build (e.g. v1.4.0)'
         required: true
+      target:
+        description: 'Make target to publish (default: all-amis)'
+        required: false
+        default: all-amis
 
 permissions:
   id-token: write
@@ -27,5 +31,6 @@ jobs:
     uses: ./.github/workflows/ami-publish-common.yml
     with:
       tag: ${{ github.event.release.tag_name || inputs.tag }}
+      target: ${{ inputs.target || 'all-amis' }}
     secrets:
       AWS_PUBLISH_ROLE_ARN: ${{ secrets.AWS_PUBLISH_ROLE_ARN }}
