@@ -2,26 +2,30 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://fck-nat.dev/develop/</loc>
-         <lastmod>2026-05-12</lastmod>
+         <lastmod>2026-05-31</lastmod>
+    </url>
+    <url>
+         <loc>https://fck-nat.dev/develop/ami-support-policy/</loc>
+         <lastmod>2026-05-31</lastmod>
     </url>
     <url>
          <loc>https://fck-nat.dev/develop/choosing_an_instance_size/</loc>
-         <lastmod>2026-05-12</lastmod>
+         <lastmod>2026-05-31</lastmod>
     </url>
     <url>
          <loc>https://fck-nat.dev/develop/configuration/</loc>
-         <lastmod>2026-05-12</lastmod>
+         <lastmod>2026-05-31</lastmod>
     </url>
     <url>
          <loc>https://fck-nat.dev/develop/deploying/</loc>
-         <lastmod>2026-05-12</lastmod>
+         <lastmod>2026-05-31</lastmod>
     </url>
     <url>
          <loc>https://fck-nat.dev/develop/features/</loc>
-         <lastmod>2026-05-12</lastmod>
+         <lastmod>2026-05-31</lastmod>
     </url>
     <url>
          <loc>https://fck-nat.dev/develop/limitations/</loc>
-         <lastmod>2026-05-12</lastmod>
+         <lastmod>2026-05-31</lastmod>
     </url>
 </urlset>
