@@ -24,41 +24,8 @@ concurrency:
 
 jobs:
   publish:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Resolve tag
-        id: tag
-        run: |
-          TAG="${{ github.event.release.tag_name || inputs.tag }}"
-          # Strip leading "v" if present — Makefile VERSION is unprefixed.
-          VERSION="${TAG#v}"
-          echo "tag=${TAG}" >> "${GITHUB_OUTPUT}"
-          echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
-
-      - name: Checkout release tag
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ steps.tag.outputs.tag }}
-
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_PUBLISH_ROLE_ARN }}
-          aws-region: us-west-2
-
-      - name: Install Packer
-        uses: hashicorp/setup-packer@v3
-        with:
-          version: latest
-
-      - name: Install fpm
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ruby ruby-dev rpm
-          sudo gem install --no-document fpm
-
-      - name: Initialize Packer plugins
-        run: packer init packer/fck-nat.pkr.hcl
-
-      - name: Publish all AMIs
-        run: make publish VERSION=${{ steps.tag.outputs.version }}
+    uses: ./.github/workflows/ami-publish-common.yml
+    with:
+      ref: ${{ github.event.release.tag_name || inputs.tag }}
+    secrets:
+      AWS_PUBLISH_ROLE_ARN: ${{ secrets.AWS_PUBLISH_ROLE_ARN }}
