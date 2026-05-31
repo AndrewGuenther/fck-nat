@@ -15,12 +15,8 @@ on:
     - cron: '0 0 1 1,7 *'
   workflow_dispatch:
     inputs:
-      ref:
-        description: 'Git ref to build (default: latest GitHub release tag)'
-        required: false
-        default: ''
-      version:
-        description: 'Package version override (default: ref without leading v)'
+      tag:
+        description: 'Release tag to refresh (default: latest GitHub release tag)'
         required: false
         default: ''
 
@@ -36,7 +32,6 @@ jobs:
   publish:
     uses: ./.github/workflows/ami-publish-common.yml
     with:
-      ref: ${{ inputs.ref || '' }}
-      version: ${{ inputs.version || '' }}
+      tag: ${{ inputs.tag || '' }}
     secrets:
       AWS_PUBLISH_ROLE_ARN: ${{ secrets.AWS_PUBLISH_ROLE_ARN }}

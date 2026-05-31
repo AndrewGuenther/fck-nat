@@ -26,6 +26,6 @@ jobs:
   publish:
     uses: ./.github/workflows/ami-publish-common.yml
     with:
-      ref: ${{ github.event.release.tag_name || inputs.tag }}
+      tag: ${{ github.event.release.tag_name || inputs.tag }}
     secrets:
       AWS_PUBLISH_ROLE_ARN: ${{ secrets.AWS_PUBLISH_ROLE_ARN }}
