@@ -22,8 +22,12 @@ permissions:
   contents: read
 
 jobs:
-  publish:
+  resolve:
     runs-on: ubuntu-latest
+    outputs:
+      ref: ${{ steps.build.outputs.ref }}
+      version: ${{ steps.build.outputs.version }}
+      targets: ${{ steps.build.outputs.targets }}
     steps:
       - name: Resolve build ref and version
         id: build
@@ -31,6 +35,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           INPUT_TAG: ${{ inputs.tag }}
+          INPUT_TARGET: ${{ inputs.target }}
         shell: bash
         run: |
           set -euo pipefail
@@ -53,16 +58,44 @@ jobs:
           fi
 
           VERSION="${TAG#v}"
+          ALL_AMI_TARGETS='["al2023-ami-arm64","al2023-ami-x86","al2023-ami-nat64-arm64","al2023-ami-nat64-x86"]'
+
+          # Aggregate Make targets would run every AMI build in one job, which can
+          # exceed the AWS OIDC credential session. Expand them into matrix jobs
+          # so each concrete AMI target gets its own credentials.
+          case "${INPUT_TARGET:-all-amis}" in
+            all-amis|al2023-ami|publish)
+              TARGETS="${ALL_AMI_TARGETS}"
+              ;;
+            al2023-ami-arm64|al2023-ami-x86|al2023-ami-nat64-arm64|al2023-ami-nat64-x86)
+              TARGETS="[\"${INPUT_TARGET}\"]"
+              ;;
+            *)
+              echo "Unsupported AMI publish target: ${INPUT_TARGET}" >&2
+              exit 1
+              ;;
+          esac
 
           echo "ref=${TAG}" >> "${GITHUB_OUTPUT}"
           echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "targets=${TARGETS}" >> "${GITHUB_OUTPUT}"
           echo "Resolved ref: ${TAG}"
           echo "Resolved version: ${VERSION}"
+          echo "Resolved targets: ${TARGETS}"
+
+  publish:
+    needs: resolve
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJSON(needs.resolve.outputs.targets) }}
+    steps:
 
       - name: Checkout build ref
         uses: actions/checkout@v4
         with:
-          ref: ${{ steps.build.outputs.ref }}
+          ref: ${{ needs.resolve.outputs.ref }}
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -87,6 +120,6 @@ jobs:
 
       - name: Publish AMIs
         env:
-          VERSION: ${{ steps.build.outputs.version }}
-          TARGET: ${{ inputs.target }}
+          VERSION: ${{ needs.resolve.outputs.version }}
+          TARGET: ${{ matrix.target }}
         run: make VERSION="${VERSION}" regions_file=-var-file=packer/fck-nat-public-all-regions.pkrvars.hcl -- "${TARGET}"
