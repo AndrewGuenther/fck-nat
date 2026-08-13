@@ -21,6 +21,18 @@ association of an Elastic IP (EIP) addresss at launch.
 This feature is controlled via the `eip_id` directive in the [configuration file](configuration.md#configuration-file)
 and also requires additional IAM permissions to function, see: [IAM Requirements](configuration.md#iam-requirements)
 
+## MSS Clamping
+
+AWS Managed NAT Gateway transparently clamps TCP MSS on connections it forwards. fck-nat can do the same, ensuring
+TCP sessions negotiate segment sizes that fit the narrowest link on the path. This matters when VPC instances use
+the default jumbo-frame (9001) MTU while egress crosses a 1500-MTU internet gateway path — or when a destination
+sits behind an even narrower tunnel — and path-MTU discovery's ICMP return leg is broken by SNAT or filtering.
+Without clamping, the symptom is connections that establish successfully but hang on large transfers to specific
+destinations.
+
+This feature is controlled via the `mss_clamp` directive in the [configuration file](configuration.md#configuration-file)
+and requires no additional IAM permissions.
+
 ## SSM Agent
 
 The Amazon SSM Agent is installed in the fck-nat AMI by default to allow SSH-less access to instances as well as

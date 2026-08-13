@@ -119,6 +119,12 @@ iptables -t nat -F
 echo "Adding IPv4 NAT rules..."
 iptables -t nat -A POSTROUTING -o "$nat_public_interface" -j MASQUERADE -m comment --comment "NAT routing rule installed by fck-nat"
 
+if test -n "$mss_clamp"; then
+    echo "Enabling TCP MSS clamping to path MTU..."
+    iptables -t mangle -C FORWARD -p tcp --tcp-flags SYN,RST SYN -m comment --comment "MSS clamping rule installed by fck-nat" -j TCPMSS --clamp-mss-to-pmtu 2>/dev/null || \
+        iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -m comment --comment "MSS clamping rule installed by fck-nat" -j TCPMSS --clamp-mss-to-pmtu
+fi
+
 echo "Enabling IPv6 forwarding..."
 sysctl -q -w net.ipv6.conf."$nat_public_interface".accept_ra=2
 sysctl -q -w net.ipv6.conf."$nat_private_interface".accept_ra=2
