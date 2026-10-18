@@ -117,7 +117,11 @@ echo "Flushing IPv4 NAT table..."
 iptables -t nat -F
 
 echo "Adding IPv4 NAT rules..."
-iptables -t nat -A POSTROUTING -o "$nat_public_interface" -j MASQUERADE -m comment --comment "NAT routing rule installed by fck-nat"
+masquerade_opts=""
+if test -n "$masquerade_random_fully"; then
+  masquerade_opts="--random-fully"
+fi
+iptables -t nat -A POSTROUTING -o "$nat_public_interface" -j MASQUERADE $masquerade_opts -m comment --comment "NAT routing rule installed by fck-nat"
 
 echo "Enabling IPv6 forwarding..."
 sysctl -q -w net.ipv6.conf."$nat_public_interface".accept_ra=2
