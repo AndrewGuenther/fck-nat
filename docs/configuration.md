@@ -21,6 +21,7 @@ The following describes available options:
 | `nf_conntrack_tcp_timeout_established` | Overrides `net.netfilter.nf_conntrack_tcp_timeout_established` (default 432000s = 5 days). Lowering frees conntrack slots from idle established connections faster, at the cost of dropping long-lived idle connections sooner. Useful for high-turnover workloads where the default retention floods the table with stale entries. |
 | `tcp_keepalive_time`    | Overrides `net.ipv4.tcp_keepalive_time` (default 7200s = 2 hours). Interval before the kernel sends the first keepalive probe on an otherwise idle TCP connection. Lower values surface dead peers faster but generate more keepalive traffic. |
 | `tcp_max_syn_backlog`   | Overrides `net.ipv4.tcp_max_syn_backlog` for the maximum number of half-open connections in the SYN queue. Relevant for high-concurrency bursts; raise if `netstat -s` shows SYN queue overflows under load. |
+| `masquerade_random_fully` | If set, adds `--random-fully` to the IPv4 `MASQUERADE` rule so SNAT source ports are picked uniformly at random from the ephemeral range instead of preserving the original port. Reduces silent drops from source-port collisions under high connection rates. |
 
 ## IAM Requirements
 
